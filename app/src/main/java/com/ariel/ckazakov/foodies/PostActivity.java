@@ -35,11 +35,12 @@ import java.util.Objects;
 
 public class PostActivity extends AppCompatActivity {
 
-    private Toolbar toolbar;
     private ImageButton recipeImage;
     private Button button;
     private EditText recipe;
-    private Uri imageUri;
+    private EditText title;
+
+    private Toolbar toolbar;
     private ProgressDialog loadingBar;
 
     private StorageReference db;
@@ -48,13 +49,18 @@ public class PostActivity extends AppCompatActivity {
     private String downloadUrl;
     private String saveCurrentTime;
     private String saveCurrentDate;
+    private Uri imageUri;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_recipe);
 
         recipeImage = findViewById(R.id.recipeImage);
         button = findViewById(R.id.createRecipe);
         recipe = findViewById(R.id.recipe);
+        title = findViewById(R.id.title);
 
         toolbar = findViewById(R.id.update_post_page_toolbar);
         setSupportActionBar(toolbar);
@@ -83,9 +89,6 @@ public class PostActivity extends AppCompatActivity {
             }
         });
 
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_recipe);
-
     }
 
     private void validateRecipe() {
@@ -97,8 +100,11 @@ public class PostActivity extends AppCompatActivity {
             Toast.makeText(this, "You must upload an image of the recipe", Toast.LENGTH_SHORT).show();
         else if (recipe.getText().toString().isEmpty())
             Toast.makeText(this, "You must write the recipe", Toast.LENGTH_SHORT).show();
+        else if (title.getText().toString().isEmpty())
+            Toast.makeText(this, "You must write the title", Toast.LENGTH_SHORT).show();
         else
             saveRecipePicToDB();
+        loadingBar.dismiss();
     }
 
     private void saveRecipePicToDB() {
@@ -138,9 +144,10 @@ public class PostActivity extends AppCompatActivity {
                     posts.put("date", saveCurrentDate);
                     posts.put("profileimage", Objects.requireNonNull(dataSnapshot.child("profileimage").getValue()).toString());
                     posts.put("fullname", userFullName);
+                    posts.put("title", title);
                     //TODO
 
-                    postRef.child(firebaseAuth.getCurrentUser().getUid() + saveCurrentDate + saveCurrentTime).updateChildren(posts).addOnCompleteListener(new OnCompleteListener<Void>() {
+                    postRef.child(firebaseAuth.getCurrentUser().getUid() + saveCurrentDate + "_" + saveCurrentTime).updateChildren(posts).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
                             if (task.isSuccessful()) {

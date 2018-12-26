@@ -14,6 +14,7 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -25,6 +26,8 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.squareup.picasso.Picasso;
+import com.theartofdev.edmodo.cropper.CropImage;
+import com.theartofdev.edmodo.cropper.CropImageView;
 //import com.theartofdev.edmodo.cropper.CropImage;
 //import com.theartofdev.edmodo.cropper.CropImageView;
 
@@ -44,7 +47,7 @@ public class ProfileActivity extends AppCompatActivity {
     private DatabaseReference profileRef;
     private StorageReference UserProfileImageRef;
 
-    String currentUserID;
+    private String currentUserID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,77 +82,88 @@ public class ProfileActivity extends AppCompatActivity {
             }
         });
 
-//        profileRef.addValueEventListener(new ValueEventListener() {
-//            @Override
-//            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-//                if (dataSnapshot.exists()) {
-//                    if (dataSnapshot.hasChild("profileimage")) {
-//                        String image = dataSnapshot.child("profileimage").getValue().toString();
-//                        Picasso.get().load(image).placeholder(R.drawable.profile).into(profileImage);
-//                    } else {
-//                        Toast.makeText(ProfileActivity.this, "Please select profile image first.", Toast.LENGTH_SHORT).show();
-//                    }
-//                }
-//            }
-//
-//            @Override
-//            public void onCancelled(@NonNull DatabaseError databaseError) {
-//
-//            }
-//        });
+        profileRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    if (dataSnapshot.hasChild("profileimage")) {
+                        String image = Objects.requireNonNull(dataSnapshot.child("profileimage").getValue()).toString();
+                        Picasso.get().load(image).placeholder(R.drawable.profile).into(profileImage);
+                    } else {
+                        Toast.makeText(ProfileActivity.this, "Please select profile image first.", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
     }
 
-//    @Override
-//    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-//        super.onActivityResult(requestCode, resultCode, data);
-//        if (requestCode == 1 && resultCode == RESULT_OK && data != null) {
-//            Uri ImageUri = data.getData();
-//
-//            CropImage.activity()
-//                    .setGuidelines(CropImageView.Guidelines.ON)
-//                    .setAspectRatio(1, 1)
-//                    .start(this);
-//        }
-//
-//        if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
-//            CropImage.ActivityResult result = CropImage.getActivityResult(data);
-//
-//            if (resultCode == RESULT_OK) {
-//                loadingBar.setTitle("Profile Image");
-//                loadingBar.setMessage("Please wait, while we updating your profile image...");
-//                loadingBar.show();
-//                loadingBar.setCanceledOnTouchOutside(true);
-//
-//                Uri resultUri = result.getUri();
-//
-//                final StorageReference filePath = UserProfileImageRef.child(currentUserID + ".jpg");
-//                filePath.putFile(resultUri).continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
-//                    @Override
-//                    public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
-//                        if (!task.isSuccessful()) {
-//                            throw Objects.requireNonNull(task.getException());
-//                        }
-//                        // Continue with the task to get the download URL
-//                        return filePath.getDownloadUrl();
-//                    }
-//                }).addOnCompleteListener(new OnCompleteListener<Uri>() {
-//                    @Override
-//                    public void onComplete(@NonNull Task<Uri> task) {
-//                        if (task.isSuccessful()) {
-//                            Uri downloadUri = task.getResult();
-//                        } else {
-//                            // Handle failures
-//                            // ...
-//                        }
-//                    }
-//                });
-//
-//            } else {
-//                Toast.makeText(this, "Error Occured: Image can not be cropped. Try Again.", Toast.LENGTH_SHORT).show();
-//                loadingBar.dismiss();
-//            }
-//        }
-//    }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 1 && resultCode == RESULT_OK && data != null) {
+            Uri imageUri = data.getData();
+
+            CropImage.activity(imageUri)
+                    .setGuidelines(CropImageView.Guidelines.ON)
+                    .setAspectRatio(1, 1)
+                    .start(this);
+        }
+
+        if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
+            CropImage.ActivityResult result = CropImage.getActivityResult(data);
+
+            if (resultCode == RESULT_OK) {
+
+                loadingBar.setTitle("Cropping image");
+                loadingBar.setMessage("Please wait, while we are cropping your profile image...");
+                loadingBar.show();
+                loadingBar.setCanceledOnTouchOutside(true);
+
+                Uri resultUri = Objects.requireNonNull(result).getUri();
+
+                StorageReference filePath = UserProfileImageRef.child(currentUserID + ".jpg");
+
+                filePath.putFile(resultUri).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                        if (task.isSuccessful()) {
+                            Toast.makeText(ProfileActivity.this, "Profile image successfully stored in Firebase storage ...", Toast.LENGTH_SHORT).show();
+                            Task<Uri> result = Objects.requireNonNull(Objects.requireNonNull(Objects.requireNonNull(task.getResult()).getMetadata()).getReference()).getDownloadUrl();
+                            result.addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                @Override
+                                public void onSuccess(Uri uri) {
+                                    final String downloadUrl = uri.toString();
+                                    profileRef.child("profileimage").setValue(downloadUrl)
+                                            .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                @Override
+                                                public void onComplete(@NonNull Task<Void> task) {
+                                                    if (task.isSuccessful()) {
+                                                        Intent selfIntent = new Intent(ProfileActivity.this, ProfileActivity.class);
+                                                        startActivity(selfIntent);
+                                                        Toast.makeText(ProfileActivity.this, "Profile image stored in Firebase Storage successfully ...", Toast.LENGTH_SHORT).show();
+                                                        loadingBar.dismiss();
+                                                    } else {
+                                                        Toast.makeText(ProfileActivity.this, "Error: " + Objects.requireNonNull(task.getException()).getMessage(), Toast.LENGTH_SHORT).show();
+                                                        loadingBar.dismiss();
+                                                    }
+                                                }
+                                            });
+                                }
+                            });
+                        }
+                    }
+                });
+            } else {
+                Toast.makeText(ProfileActivity.this, "Error: The image has not been cut well. Try again.", Toast.LENGTH_SHORT).show();
+                loadingBar.dismiss();
+            }
+        }
+    }
 
     private void saveProfile() {
         String firstname = firstName.getText().toString();

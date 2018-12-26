@@ -43,6 +43,10 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseAuth firebaseAuth;
     private DatabaseReference recipeRef, usersRef;
 
+    private CircleImageView navProfileImage;
+    private TextView navProfileUser;
+    private String currentUserID;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,6 +55,9 @@ public class MainActivity extends AppCompatActivity {
         firebaseAuth = FirebaseAuth.getInstance();
         recipeRef = FirebaseDatabase.getInstance().getReference().child("Recipes");
         usersRef = FirebaseDatabase.getInstance().getReference().child("Users");
+        if (firebaseAuth.getCurrentUser() != null)
+            currentUserID = firebaseAuth.getCurrentUser().getUid();
+        else currentUserID = "";
 
         toolbar = findViewById(R.id.main_page_toolbar);
         setSupportActionBar(toolbar);
@@ -59,7 +66,33 @@ public class MainActivity extends AppCompatActivity {
         drawerLayout = findViewById(R.id.drawable_layout);
         navigationView = findViewById(R.id.navigation_view);
         View navView = navigationView.inflateHeaderView(R.layout.navigation_header);
+        navProfileImage = navView.findViewById(R.id.profile_image);
+        navProfileUser = navView.findViewById(R.id.username);
+        usersRef.child(currentUserID).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+
+                    if (dataSnapshot.hasChild("firstname") && dataSnapshot.hasChild("lastname") && dataSnapshot.hasChild("profileimage")) {
+                        String firstname = Objects.requireNonNull(dataSnapshot.child("firstname").getValue()).toString();
+                        String lastname = Objects.requireNonNull(dataSnapshot.child("lastname").getValue()).toString();
+                        String fullname = firstname + " " + lastname;
+                        String profileImage = Objects.requireNonNull(dataSnapshot.child("profileimage").getValue()).toString();
+
+                        navProfileUser.setText(fullname);
+                        Picasso.get().load(profileImage).placeholder(R.drawable.profile).into(navProfileImage);
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
         actionBarDrawerToggle = new ActionBarDrawerToggle(MainActivity.this, drawerLayout, R.string.drawer_open, R.string.drawer_close);
+        drawerLayout.addDrawerListener(actionBarDrawerToggle);
         actionBarDrawerToggle.syncState();
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -78,7 +111,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        displayAllRecipes();
+        //displayAllRecipes();
     }
 
     private void displayAllRecipes() {

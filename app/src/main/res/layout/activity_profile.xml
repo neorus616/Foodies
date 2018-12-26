@@ -26,7 +26,7 @@
         android:ems="10"
         android:inputType="textMultiLine"
         android:padding="14dp"
-        android:text="First name" />
+        android:hint="First name" />
 
     <EditText
         android:id="@+id/lastname"
@@ -39,7 +39,7 @@
         android:ems="10"
         android:inputType="textMultiLine"
         android:padding="14dp"
-        android:text="Last name" />
+        android:hint="Last name" />
 
     <Button
         android:id="@+id/saveProfile"
