@@ -1,6 +1,7 @@
 package com.ariel.ckazakov.foodies;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.widget.DrawerLayout;
@@ -41,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
     private ActionBarDrawerToggle actionBarDrawerToggle;
 
     private FirebaseAuth firebaseAuth;
-    private DatabaseReference recipeRef, usersRef;
+    private DatabaseReference recipeRef, userRef;
 
     private CircleImageView navProfileImage;
     private TextView navProfileUser;
@@ -54,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
 
         firebaseAuth = FirebaseAuth.getInstance();
         recipeRef = FirebaseDatabase.getInstance().getReference().child("Recipes");
-        usersRef = FirebaseDatabase.getInstance().getReference().child("Users");
+        userRef = FirebaseDatabase.getInstance().getReference().child("Users");
         if (firebaseAuth.getCurrentUser() != null)
             currentUserID = firebaseAuth.getCurrentUser().getUid();
         else currentUserID = "";
@@ -68,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
         View navView = navigationView.inflateHeaderView(R.layout.navigation_header);
         navProfileImage = navView.findViewById(R.id.profile_image);
         navProfileUser = navView.findViewById(R.id.username);
-        usersRef.child(currentUserID).addValueEventListener(new ValueEventListener() {
+        userRef.child(currentUserID).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
@@ -99,8 +100,8 @@ public class MainActivity extends AppCompatActivity {
         recyclerView = findViewById(R.id.all_users_post_list);
         recyclerView.setHasFixedSize(Boolean.TRUE);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
-        linearLayoutManager.setReverseLayout(Boolean.TRUE);
-        linearLayoutManager.setStackFromEnd(Boolean.TRUE);
+        linearLayoutManager.setReverseLayout(Boolean.FALSE);
+        linearLayoutManager.setStackFromEnd(Boolean.FALSE);
         recyclerView.setLayoutManager(linearLayoutManager);
 
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
@@ -110,8 +111,7 @@ public class MainActivity extends AppCompatActivity {
                 return false;
             }
         });
-
-        //displayAllRecipes();
+        displayAllRecipes();
     }
 
     private void displayAllRecipes() {
@@ -119,14 +119,12 @@ public class MainActivity extends AppCompatActivity {
         FirebaseRecyclerAdapter<Recipe, RecipeViewHolder> firebaseRecyclerAdapter = new FirebaseRecyclerAdapter<Recipe, RecipeViewHolder>(options) {
             @Override
             protected void onBindViewHolder(@NonNull RecipeViewHolder holder, int position, @NonNull Recipe model) {
-                //TODO
-                holder.username.setText(model.getFullname());
-                holder.time.setText(" " + model.getTime());
-                holder.date.setText(" " + model.getDate());
-//                holder.description.setText(model.getDescription());
-//                Picasso.get().load(model.getProfileimage()).into(holder.user_post_image);
-//                Picasso.get().load(model.getPostimage()).into(holder.postImage);
-
+                holder.fullname.setText(model.getFullName());
+                holder.time.setText(String.format(" %s", model.getTime()));
+                holder.date.setText(String.format(" %s", model.getDate()));
+                holder.title.setText(model.getTitle());
+                Picasso.get().load(model.getRecipeImage()).into(holder.postImage);
+                Picasso.get().load(model.getProfileImage()).into(holder.user_post_image);
             }
 
             @NonNull
@@ -140,42 +138,22 @@ public class MainActivity extends AppCompatActivity {
         firebaseRecyclerAdapter.startListening();
     }
 
-    public static class RecipeViewHolder extends RecyclerView.ViewHolder {
-        TextView username, date, time, description;
-        CircleImageView user_post_image;
-        ImageView postImage;
+    private void CheckUserExistence() {
+        final String currentUserID = Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid();
 
-        RecipeViewHolder(View itemView) {
-            super(itemView);
+        userRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (!dataSnapshot.hasChild(currentUserID)) {
+                    sendUserToProfileActivity();
+                }
+            }
 
-//            username=itemView.findViewById(R.id.post_user_name);
-//            date=itemView.findViewById(R.id.post_date);
-//            time=itemView.findViewById(R.id.post_time);
-//            description=itemView.findViewById(R.id.post_discription);
-//            postImage=itemView.findViewById(R.id.post_image);
-//            user_post_image=itemView.findViewById(R.id.post_User_image);
-        }
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
 
-        public void setFullname(String fullname) {
-            TextView username = itemView.findViewById(R.id.post_username);
-            username.setText(fullname);
-        }
-
-        public void set(String profileImage) {
-            CircleImageView profileImg = itemView.findViewById(R.id.profile_image);
-            Picasso.get().load(profileImage).placeholder(R.drawable.profile).into(profileImg);
-        }
-
-//        public void setTime(String time) {
-//            TextView recipeTime = itemView.findViewById(R.id.recipe_time);
-////            recipeTime.setText(time);
-//        }
-
-//        public void setTime(String date) {
-//            TextView recipeDate = itemView.findViewById(R.id.recipe_date);
-//            recipeDate.setText(date);
-//        }
-        //TODO all other setters
+            }
+        });
     }
 
     @Override
@@ -223,22 +201,43 @@ public class MainActivity extends AppCompatActivity {
         startActivity(postActivity);
     }
 
-    private void CheckUserExistence() {
-        final String currentUserID = Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid();
+    public static class RecipeViewHolder extends RecyclerView.ViewHolder {
+        TextView fullname, date, time, title;
+        CircleImageView user_post_image;
+        ImageView postImage;
 
-        usersRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (!dataSnapshot.hasChild(currentUserID)) {
-                    sendUserToProfileActivity();
-                }
-            }
+        RecipeViewHolder(View itemView) {
+            super(itemView);
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
+            fullname = itemView.findViewById(R.id.post_username);
+            date = itemView.findViewById(R.id.post_date);
+            time = itemView.findViewById(R.id.post_time);
+            title = itemView.findViewById(R.id.post_title);
+            postImage = itemView.findViewById(R.id.post_image);
+            user_post_image = itemView.findViewById(R.id.post_profile_image);
+        }
 
-            }
-        });
+        public void setFullname(String fullname) {
+            TextView username = itemView.findViewById(R.id.post_username);
+            username.setText(fullname);
+        }
+
+        public void setTime(String time) {
+            TextView recipeTime = itemView.findViewById(R.id.post_time);
+            recipeTime.setText(time);
+        }
+
+        public void setDate(String date) {
+            TextView recipeDate = itemView.findViewById(R.id.post_date);
+            recipeDate.setText(date);
+        }
+
+        public void setTitle(String title) {
+            TextView titlePost = itemView.findViewById(R.id.post_title);
+            titlePost.setText(title);
+        }
+
+
     }
 
     private void sendUserToProfileActivity() {

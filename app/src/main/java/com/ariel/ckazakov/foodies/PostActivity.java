@@ -44,7 +44,7 @@ public class PostActivity extends AppCompatActivity {
     private ProgressDialog loadingBar;
 
     private StorageReference db;
-    private DatabaseReference userRef, postRef;
+    private DatabaseReference userRef, recipeRef;
     private FirebaseAuth firebaseAuth;
     private String downloadUrl;
     private String saveCurrentTime;
@@ -72,7 +72,7 @@ public class PostActivity extends AppCompatActivity {
 
         db = FirebaseStorage.getInstance().getReference();
         userRef = FirebaseDatabase.getInstance().getReference().child("Users");
-        postRef = FirebaseDatabase.getInstance().getReference().child("Recipes");
+        recipeRef = FirebaseDatabase.getInstance().getReference().child("Recipes");
         firebaseAuth = FirebaseAuth.getInstance();
 
         recipeImage.setOnClickListener(new View.OnClickListener() {
@@ -92,19 +92,20 @@ public class PostActivity extends AppCompatActivity {
     }
 
     private void validateRecipe() {
-        loadingBar.setTitle("Posting recipe");
-        loadingBar.setMessage("Please wait while we validate your recipe..");
-        loadingBar.show();
-        loadingBar.setCanceledOnTouchOutside(Boolean.TRUE);
+
         if (imageUri == null)
             Toast.makeText(this, "You must upload an image of the recipe", Toast.LENGTH_SHORT).show();
         else if (recipe.getText().toString().isEmpty())
             Toast.makeText(this, "You must write the recipe", Toast.LENGTH_SHORT).show();
         else if (title.getText().toString().isEmpty())
             Toast.makeText(this, "You must write the title", Toast.LENGTH_SHORT).show();
-        else
+        else {
+            loadingBar.setTitle("Posting recipe");
+            loadingBar.setMessage("Please wait while we validate your recipe..");
+            loadingBar.show();
+            loadingBar.setCanceledOnTouchOutside(Boolean.TRUE);
             saveRecipePicToDB();
-        loadingBar.dismiss();
+        }
     }
 
     private void saveRecipePicToDB() {
@@ -114,7 +115,8 @@ public class PostActivity extends AppCompatActivity {
         SimpleDateFormat currentTime = new SimpleDateFormat("HH:mm", Locale.US);
         saveCurrentTime = currentTime.format(calendarDate.getTime());
 
-        StorageReference path = db.child("Recipe Images").child(imageUri.getLastPathSegment() + saveCurrentDate + saveCurrentTime + ".jpg");
+        StorageReference path = db.child("Recipe Images")
+                .child(imageUri.getLastPathSegment() + saveCurrentDate + saveCurrentTime + ".jpg");
         path.putFile(imageUri).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
@@ -135,24 +137,23 @@ public class PostActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
+                    String currentUserUid = firebaseAuth.getCurrentUser().getUid();
                     String userFullName = dataSnapshot.child("firstname").getValue().toString() + " " + dataSnapshot.child("lastname").getValue().toString();
                     HashMap<String, Object> posts = new HashMap<>();
-                    posts.put("uid", firebaseAuth.getCurrentUser().getUid());
+                    posts.put("uid", currentUserUid);
                     posts.put("recipeimage", downloadUrl);
                     posts.put("recipe", recipe.getText().toString());
                     posts.put("time", saveCurrentTime);
                     posts.put("date", saveCurrentDate);
                     posts.put("profileimage", Objects.requireNonNull(dataSnapshot.child("profileimage").getValue()).toString());
                     posts.put("fullname", userFullName);
-                    posts.put("title", title);
-                    //TODO
-
-                    postRef.child(firebaseAuth.getCurrentUser().getUid() + saveCurrentDate + "_" + saveCurrentTime).updateChildren(posts).addOnCompleteListener(new OnCompleteListener<Void>() {
+                    posts.put("title", title.getText().toString());
+                    recipeRef.child(currentUserUid + "" + saveCurrentDate + "" + saveCurrentTime).updateChildren(posts).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
                             if (task.isSuccessful()) {
-                                Toast.makeText(PostActivity.this, "Recipe updated successfully", Toast.LENGTH_SHORT).show();
                                 sendUserToMainActivity();
+                                Toast.makeText(PostActivity.this, "Recipe updated successfully", Toast.LENGTH_SHORT).show();
                             } else
                                 Toast.makeText(PostActivity.this, "Error occurred: " + Objects.requireNonNull(task.getException()).getMessage(), Toast.LENGTH_SHORT).show();
                             loadingBar.dismiss();
@@ -183,7 +184,6 @@ public class PostActivity extends AppCompatActivity {
             imageUri = data.getData();
             recipeImage.setImageURI(imageUri);
         }
-
     }
 
     @Override

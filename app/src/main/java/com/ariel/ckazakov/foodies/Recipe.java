@@ -2,12 +2,22 @@ package com.ariel.ckazakov.foodies;
 
 public class Recipe {
 
-    public String uid;
-    public String time;
-    public String date;
-    public String postImage;
-    public String recipe;
-    public String fullname;
+    private String uid, time, date, recipeimage, recipe, fullname, profileimage, title;
+
+    public Recipe() {
+
+    }
+
+    public Recipe(String uid, String time, String date, String recipeimage, String recipe, String fullname, String profileimage, String title) {
+        this.uid = uid;
+        this.time = time;
+        this.date = date;
+        this.recipeimage = recipeimage;
+        this.recipe = recipe;
+        this.fullname = fullname;
+        this.profileimage = profileimage;
+        this.title = title;
+    }
 
     public String getUid() {
         return uid;
@@ -33,12 +43,12 @@ public class Recipe {
         this.date = date;
     }
 
-    public String getPostImage() {
-        return postImage;
+    public String getRecipeImage() {
+        return recipeimage;
     }
 
-    public void setPostImage(String postImage) {
-        this.postImage = postImage;
+    public void setRecipeImage(String recipeimage) {
+        this.recipeimage = recipeimage;
     }
 
     public String getRecipe() {
@@ -49,20 +59,28 @@ public class Recipe {
         this.recipe = recipe;
     }
 
-    public String getFullname() {
+    public String getFullName() {
         return fullname;
     }
 
-    public void setFullname(String fullname) {
+    public void setFullName(String fullname) {
         this.fullname = fullname;
     }
 
-    public Recipe(String uid, String time, String date, String postImage, String recipe, String fullname) {
-        this.uid = uid;
-        this.time = time;
-        this.date = date;
-        this.postImage = postImage;
-        this.recipe = recipe;
-        this.fullname = fullname;
+    public String getProfileImage() {
+        return profileimage;
     }
+
+    public void setProfileImage(String profileimage) {
+        this.profileimage = profileimage;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
 }

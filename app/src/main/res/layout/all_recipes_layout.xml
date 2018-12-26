@@ -21,7 +21,7 @@
             android:padding="5dp">
 
             <de.hdodenhof.circleimageview.CircleImageView
-                android:id="@+id/profile_image"
+                android:id="@+id/post_profile_image"
                 android:layout_width="60dp"
                 android:layout_height="60dp"
                 android:layout_marginLeft="4dp"
@@ -52,29 +52,43 @@
                     android:orientation="horizontal"
                     android:padding="2dp">
 
+                    <TextView
+                        android:id="@+id/post_date"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Date"
+                        android:textSize="13sp" />
+
+                    <TextView
+                        android:id="@+id/post_time"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Date"
+                        android:textSize="13sp" />
+
                 </LinearLayout>
             </LinearLayout>
         </LinearLayout>
 
         <TextView
-            android:id="@+id/post_recipe"
+            android:id="@+id/post_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="3dp"
             android:layout_marginRight="3dp"
             android:padding="3dp"
-            android:text="recipe"
+            android:text="title"
             android:textColor="@android:color/black"
             android:textSize="14sp" />
 
         <ImageView
             android:id="@+id/post_image"
             android:layout_width="match_parent"
-            android:layout_height="200dp"
+            android:layout_height="150dp"
             android:layout_margin="3dp"
             android:adjustViewBounds="true"
-            android:scaleType="centerCrop"
-            android:contentDescription="Image of the recipe" />
+            android:contentDescription="Image of the recipe"
+            android:scaleType="centerCrop" />
 
 
     </LinearLayout>
