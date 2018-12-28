@@ -1,13 +1,12 @@
 package com.ariel.ckazakov.foodies;
 
 import android.content.Intent;
-import android.net.Uri;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -123,8 +122,8 @@ public class MainActivity extends AppCompatActivity {
                 holder.time.setText(String.format(" %s", model.getTime()));
                 holder.date.setText(String.format(" %s", model.getDate()));
                 holder.title.setText(model.getTitle());
-                Picasso.get().load(model.getRecipeImage()).into(holder.postImage);
-                Picasso.get().load(model.getProfileImage()).into(holder.user_post_image);
+                holder.setRecipeImage(model.getRecipeImage());
+                holder.setProfileImage(model.getProfileImage());
             }
 
             @NonNull
@@ -204,7 +203,7 @@ public class MainActivity extends AppCompatActivity {
     public static class RecipeViewHolder extends RecyclerView.ViewHolder {
         TextView fullname, date, time, title;
         CircleImageView user_post_image;
-        ImageView postImage;
+        ImageView post_image;
 
         RecipeViewHolder(View itemView) {
             super(itemView);
@@ -213,7 +212,7 @@ public class MainActivity extends AppCompatActivity {
             date = itemView.findViewById(R.id.post_date);
             time = itemView.findViewById(R.id.post_time);
             title = itemView.findViewById(R.id.post_title);
-            postImage = itemView.findViewById(R.id.post_image);
+            post_image = itemView.findViewById(R.id.post_image);
             user_post_image = itemView.findViewById(R.id.post_profile_image);
         }
 
@@ -235,6 +234,16 @@ public class MainActivity extends AppCompatActivity {
         public void setTitle(String title) {
             TextView titlePost = itemView.findViewById(R.id.post_title);
             titlePost.setText(title);
+        }
+
+        public void setProfileImage(String profileimage) {
+            CircleImageView image = itemView.findViewById(R.id.post_profile_image);
+            Picasso.get().load(profileimage).into(image);
+        }
+
+        public void setRecipeImage(String recipeimage) {
+            ImageView recipeImage = itemView.findViewById(R.id.post_image);
+            Picasso.get().load(recipeimage).into(recipeImage);
         }
 
 

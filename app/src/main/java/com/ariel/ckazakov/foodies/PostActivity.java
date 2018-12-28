@@ -3,10 +3,10 @@ package com.ariel.ckazakov.foodies;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
@@ -15,6 +15,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -115,19 +116,27 @@ public class PostActivity extends AppCompatActivity {
         SimpleDateFormat currentTime = new SimpleDateFormat("HH:mm", Locale.US);
         saveCurrentTime = currentTime.format(calendarDate.getTime());
 
-        StorageReference path = db.child("Recipe Images")
+        final StorageReference path = db.child("Recipe Images")
                 .child(imageUri.getLastPathSegment() + saveCurrentDate + saveCurrentTime + ".jpg");
-        path.putFile(imageUri).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+        path.putFile(imageUri).continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
             @Override
-            public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+            public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                if (!task.isSuccessful()) {
+                    throw Objects.requireNonNull(task.getException());
+                }
+                return path.getDownloadUrl();
+            }
+        }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+            @Override
+            public void onComplete(@NonNull Task<Uri> task) {
                 if (task.isSuccessful()) {
-                    downloadUrl = Objects.requireNonNull(Objects.requireNonNull(
-                            Objects.requireNonNull(task.getResult()).getMetadata()).getReference())
-                            .getDownloadUrl().toString();
+                    Uri downloadUri = task.getResult();
+                    downloadUrl = Objects.requireNonNull(downloadUri).toString();
                     Toast.makeText(PostActivity.this, "Image uploaded successfully", Toast.LENGTH_SHORT).show();
                     SaveRecipeToDB();
-                } else
-                    Toast.makeText(PostActivity.this, "Error occurred: " + Objects.requireNonNull(task.getException()).getMessage(), Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(PostActivity.this, "upload failed: " + Objects.requireNonNull(task.getException()).getMessage(), Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }
@@ -138,7 +147,8 @@ public class PostActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
                     String currentUserUid = firebaseAuth.getCurrentUser().getUid();
-                    String userFullName = dataSnapshot.child("firstname").getValue().toString() + " " + dataSnapshot.child("lastname").getValue().toString();
+                    String userFullName = Objects.requireNonNull(dataSnapshot.child("firstname").getValue()).toString()
+                            + " " + Objects.requireNonNull(dataSnapshot.child("lastname").getValue()).toString();
                     HashMap<String, Object> posts = new HashMap<>();
                     posts.put("uid", currentUserUid);
                     posts.put("recipeimage", downloadUrl);
