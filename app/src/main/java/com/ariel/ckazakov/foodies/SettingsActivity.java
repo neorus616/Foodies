@@ -153,11 +153,10 @@ public class SettingsActivity extends AppCompatActivity {
                                                         Intent selfIntent = new Intent(SettingsActivity.this, SettingsActivity.class);
                                                         startActivity(selfIntent);
                                                         Toast.makeText(SettingsActivity.this, "Profile image stored in Firebase Storage successfully ...", Toast.LENGTH_SHORT).show();
-                                                        loadingBar.dismiss();
                                                     } else {
                                                         Toast.makeText(SettingsActivity.this, "Error: " + Objects.requireNonNull(task.getException()).getMessage(), Toast.LENGTH_SHORT).show();
-                                                        loadingBar.dismiss();
                                                     }
+                                                    loadingBar.dismiss();
                                                 }
                                             });
                                 }

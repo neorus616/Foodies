@@ -155,7 +155,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (!dataSnapshot.hasChild(currentUserID)) {
-                    SendUserToProfileActivity();
+                    SendUserToProfileSetupActivity();
                 }
             }
 
@@ -206,7 +206,15 @@ public class MainActivity extends AppCompatActivity {
             case R.id.nav_settings:
                 SendUserToSettingsActivity();
                 break;
+            case R.id.nav_profile:
+                SendUserToProfileActivity();
+                break;
         }
+    }
+
+    private void SendUserToProfileActivity() {
+        Intent profileActivity = new Intent(MainActivity.this, ProfileActivity.class);
+        startActivity(profileActivity);
     }
 
     private void SendUserToSettingsActivity() {
@@ -268,7 +276,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void SendUserToProfileActivity() {
+    private void SendUserToProfileSetupActivity() {
         Intent setupIntent = new Intent(MainActivity.this, ProfileSetupActivity.class);
         setupIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(setupIntent);

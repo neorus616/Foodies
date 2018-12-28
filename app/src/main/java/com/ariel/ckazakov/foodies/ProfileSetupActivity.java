@@ -50,7 +50,7 @@ public class ProfileSetupActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_profile);
+        setContentView(R.layout.activity_profile_setup);
 
         firebaseAuth = FirebaseAuth.getInstance();
         currentUserID = Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid();
