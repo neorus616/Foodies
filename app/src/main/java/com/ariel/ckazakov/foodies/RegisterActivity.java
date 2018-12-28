@@ -2,9 +2,9 @@ package com.ariel.ckazakov.foodies;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -51,10 +51,10 @@ public class RegisterActivity extends AppCompatActivity {
         super.onStart();
         FirebaseUser user = firebaseAuth.getCurrentUser();
         if (user != null)
-            sendUserToMainActivity();
+            SendUserToMainActivity();
     }
 
-    private void sendUserToMainActivity() {
+    private void SendUserToMainActivity() {
         Intent mainIntent = new Intent(RegisterActivity.this, MainActivity.class);
         mainIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(mainIntent);
@@ -83,7 +83,7 @@ public class RegisterActivity extends AppCompatActivity {
                 @Override
                 public void onComplete(@NonNull Task<AuthResult> task) {
                     if (task.isSuccessful()) {
-                        sendUserToCreateProfile();
+                        SendUserToCreateProfile();
                         Toast.makeText(RegisterActivity.this, "Account is created!", Toast.LENGTH_SHORT).show();
                     } else
                         Toast.makeText(RegisterActivity.this, "Error occurred: " + Objects.requireNonNull(task.getException()).getMessage(), Toast.LENGTH_SHORT).show();
@@ -93,7 +93,7 @@ public class RegisterActivity extends AppCompatActivity {
         }
     }
 
-    private void sendUserToCreateProfile() {
+    private void SendUserToCreateProfile() {
         Intent profileIntent = new Intent(this, ProfileActivity.class);
         profileIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(profileIntent);

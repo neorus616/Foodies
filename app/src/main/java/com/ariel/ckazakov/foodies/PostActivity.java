@@ -162,7 +162,7 @@ public class PostActivity extends AppCompatActivity {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
                             if (task.isSuccessful()) {
-                                sendUserToMainActivity();
+                                SendUserToMainActivity();
                                 Toast.makeText(PostActivity.this, "Recipe updated successfully", Toast.LENGTH_SHORT).show();
                             } else
                                 Toast.makeText(PostActivity.this, "Error occurred: " + Objects.requireNonNull(task.getException()).getMessage(), Toast.LENGTH_SHORT).show();
@@ -201,12 +201,12 @@ public class PostActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         if (id == android.R.id.home)
-            sendUserToMainActivity();
+            SendUserToMainActivity();
 
         return super.onOptionsItemSelected(item);
     }
 
-    private void sendUserToMainActivity() {
+    private void SendUserToMainActivity() {
         Intent mainActivity = new Intent(PostActivity.this, MainActivity.class);
         startActivity(mainActivity);
     }

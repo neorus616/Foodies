@@ -155,7 +155,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (!dataSnapshot.hasChild(currentUserID)) {
-                    sendUserToProfileActivity();
+                    SendUserToProfileActivity();
                 }
             }
 
@@ -201,12 +201,20 @@ public class MainActivity extends AppCompatActivity {
                 SendUserToLoginActivity();
                 break;
             case R.id.nav_post:
-                sendUserToPostActivity();
+                SendUserToPostActivity();
+                break;
+            case R.id.nav_settings:
+                SendUserToSettingsActivity();
                 break;
         }
     }
 
-    private void sendUserToPostActivity() {
+    private void SendUserToSettingsActivity() {
+        Intent settingsActivity = new Intent(MainActivity.this, SettingsActivity.class);
+        startActivity(settingsActivity);
+    }
+
+    private void SendUserToPostActivity() {
         Intent postActivity = new Intent(MainActivity.this, PostActivity.class);
         startActivity(postActivity);
     }
@@ -260,7 +268,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void sendUserToProfileActivity() {
+    private void SendUserToProfileActivity() {
         Intent setupIntent = new Intent(MainActivity.this, ProfileActivity.class);
         setupIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(setupIntent);

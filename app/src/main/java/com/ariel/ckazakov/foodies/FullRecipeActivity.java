@@ -118,11 +118,11 @@ public class FullRecipeActivity extends AppCompatActivity {
 
     private void DeletePost() {
         fullrecipedb.removeValue();
-        sendUserToMainActivity();
+        SendUserToMainActivity();
         Toast.makeText(this, "Post has been deleted", Toast.LENGTH_SHORT).show();
     }
 
-    private void sendUserToMainActivity() {
+    private void SendUserToMainActivity() {
         Intent mainActivity = new Intent(FullRecipeActivity.this, MainActivity.class);
         startActivity(mainActivity);
     }

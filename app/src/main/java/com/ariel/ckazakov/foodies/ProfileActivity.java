@@ -3,16 +3,15 @@ package com.ariel.ckazakov.foodies;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -28,13 +27,14 @@ import com.google.firebase.storage.UploadTask;
 import com.squareup.picasso.Picasso;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
-//import com.theartofdev.edmodo.cropper.CropImage;
-//import com.theartofdev.edmodo.cropper.CropImageView;
 
 import java.util.HashMap;
 import java.util.Objects;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+
+//import com.theartofdev.edmodo.cropper.CropImage;
+//import com.theartofdev.edmodo.cropper.CropImageView;
 
 public class ProfileActivity extends AppCompatActivity {
 
@@ -121,8 +121,8 @@ public class ProfileActivity extends AppCompatActivity {
 
                 loadingBar.setTitle("Cropping image");
                 loadingBar.setMessage("Please wait, while we are cropping your profile image...");
-                loadingBar.show();
                 loadingBar.setCanceledOnTouchOutside(true);
+                loadingBar.show();
 
                 Uri resultUri = Objects.requireNonNull(result).getUri();
 
@@ -146,11 +146,10 @@ public class ProfileActivity extends AppCompatActivity {
                                                         Intent selfIntent = new Intent(ProfileActivity.this, ProfileActivity.class);
                                                         startActivity(selfIntent);
                                                         Toast.makeText(ProfileActivity.this, "Profile image stored in Firebase Storage successfully ...", Toast.LENGTH_SHORT).show();
-                                                        loadingBar.dismiss();
                                                     } else {
                                                         Toast.makeText(ProfileActivity.this, "Error: " + Objects.requireNonNull(task.getException()).getMessage(), Toast.LENGTH_SHORT).show();
-                                                        loadingBar.dismiss();
                                                     }
+                                                    loadingBar.dismiss();
                                                 }
                                             });
                                 }
@@ -188,11 +187,10 @@ public class ProfileActivity extends AppCompatActivity {
                     if (task.isSuccessful()) {
                         SendUserToMainActivity();
                         Toast.makeText(ProfileActivity.this, "Your profile is updated Successfully.", Toast.LENGTH_LONG).show();
-                        loadingBar.dismiss();
                     } else {
                         Toast.makeText(ProfileActivity.this, "Error Occurred: " + Objects.requireNonNull(task.getException()).getMessage(), Toast.LENGTH_SHORT).show();
-                        loadingBar.dismiss();
                     }
+                    loadingBar.dismiss();
                 }
             });
         }
