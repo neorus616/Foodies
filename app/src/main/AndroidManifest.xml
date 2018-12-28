@@ -23,7 +23,7 @@
         <activity android:name=".RegisterActivity" />
         <activity android:name=".LoginActivity" />
         <activity android:name=".PostActivity" />
-        <activity android:name=".ProfileActivity" />
+        <activity android:name=".ProfileSetupActivity" />
         <activity
             android:name="com.theartofdev.edmodo.cropper.CropImageActivity"
             android:theme="@style/Base.Theme.AppCompat" />

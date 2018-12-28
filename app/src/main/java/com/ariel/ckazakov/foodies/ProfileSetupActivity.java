@@ -33,10 +33,8 @@ import java.util.Objects;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
-//import com.theartofdev.edmodo.cropper.CropImage;
-//import com.theartofdev.edmodo.cropper.CropImageView;
 
-public class ProfileActivity extends AppCompatActivity {
+public class ProfileSetupActivity extends AppCompatActivity {
 
     private EditText firstName, lastName;
     private Button save;
@@ -90,7 +88,7 @@ public class ProfileActivity extends AppCompatActivity {
                         String image = Objects.requireNonNull(dataSnapshot.child("profileimage").getValue()).toString();
                         Picasso.get().load(image).placeholder(R.drawable.profile).into(profileImage);
                     } else {
-                        Toast.makeText(ProfileActivity.this, "Please select profile image first.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(ProfileSetupActivity.this, "Please select profile image first.", Toast.LENGTH_SHORT).show();
                     }
                 }
             }
@@ -132,7 +130,7 @@ public class ProfileActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
                         if (task.isSuccessful()) {
-                            Toast.makeText(ProfileActivity.this, "Profile image successfully stored in Firebase storage ...", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(ProfileSetupActivity.this, "Profile image successfully stored in Firebase storage ...", Toast.LENGTH_SHORT).show();
                             Task<Uri> result = Objects.requireNonNull(Objects.requireNonNull(Objects.requireNonNull(task.getResult()).getMetadata()).getReference()).getDownloadUrl();
                             result.addOnSuccessListener(new OnSuccessListener<Uri>() {
                                 @Override
@@ -143,11 +141,11 @@ public class ProfileActivity extends AppCompatActivity {
                                                 @Override
                                                 public void onComplete(@NonNull Task<Void> task) {
                                                     if (task.isSuccessful()) {
-                                                        Intent selfIntent = new Intent(ProfileActivity.this, ProfileActivity.class);
+                                                        Intent selfIntent = new Intent(ProfileSetupActivity.this, ProfileSetupActivity.class);
                                                         startActivity(selfIntent);
-                                                        Toast.makeText(ProfileActivity.this, "Profile image stored in Firebase Storage successfully ...", Toast.LENGTH_SHORT).show();
+                                                        Toast.makeText(ProfileSetupActivity.this, "Profile image stored in Firebase Storage successfully ...", Toast.LENGTH_SHORT).show();
                                                     } else {
-                                                        Toast.makeText(ProfileActivity.this, "Error: " + Objects.requireNonNull(task.getException()).getMessage(), Toast.LENGTH_SHORT).show();
+                                                        Toast.makeText(ProfileSetupActivity.this, "Error: " + Objects.requireNonNull(task.getException()).getMessage(), Toast.LENGTH_SHORT).show();
                                                     }
                                                     loadingBar.dismiss();
                                                 }
@@ -158,7 +156,7 @@ public class ProfileActivity extends AppCompatActivity {
                     }
                 });
             } else {
-                Toast.makeText(ProfileActivity.this, "Error: The image has not been cut well. Try again.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(ProfileSetupActivity.this, "Error: The image has not been cut well. Try again.", Toast.LENGTH_SHORT).show();
                 loadingBar.dismiss();
             }
         }
@@ -186,9 +184,9 @@ public class ProfileActivity extends AppCompatActivity {
                 public void onComplete(@NonNull Task<Void> task) {
                     if (task.isSuccessful()) {
                         SendUserToMainActivity();
-                        Toast.makeText(ProfileActivity.this, "Your profile is updated Successfully.", Toast.LENGTH_LONG).show();
+                        Toast.makeText(ProfileSetupActivity.this, "Your profile is updated Successfully.", Toast.LENGTH_LONG).show();
                     } else {
-                        Toast.makeText(ProfileActivity.this, "Error Occurred: " + Objects.requireNonNull(task.getException()).getMessage(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(ProfileSetupActivity.this, "Error Occurred: " + Objects.requireNonNull(task.getException()).getMessage(), Toast.LENGTH_SHORT).show();
                     }
                     loadingBar.dismiss();
                 }
@@ -197,7 +195,7 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void SendUserToMainActivity() {
-        Intent mainIntent = new Intent(ProfileActivity.this, MainActivity.class);
+        Intent mainIntent = new Intent(ProfileSetupActivity.this, MainActivity.class);
         mainIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(mainIntent);
         finish();

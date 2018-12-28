@@ -94,7 +94,7 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     private void SendUserToCreateProfile() {
-        Intent profileIntent = new Intent(this, ProfileActivity.class);
+        Intent profileIntent = new Intent(this, ProfileSetupActivity.class);
         profileIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(profileIntent);
         finish();

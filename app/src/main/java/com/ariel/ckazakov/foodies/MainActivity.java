@@ -269,7 +269,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void SendUserToProfileActivity() {
-        Intent setupIntent = new Intent(MainActivity.this, ProfileActivity.class);
+        Intent setupIntent = new Intent(MainActivity.this, ProfileSetupActivity.class);
         setupIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(setupIntent);
         finish();
