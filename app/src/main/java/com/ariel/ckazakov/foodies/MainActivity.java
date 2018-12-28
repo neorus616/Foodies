@@ -118,12 +118,23 @@ public class MainActivity extends AppCompatActivity {
         FirebaseRecyclerAdapter<Recipe, RecipeViewHolder> firebaseRecyclerAdapter = new FirebaseRecyclerAdapter<Recipe, RecipeViewHolder>(options) {
             @Override
             protected void onBindViewHolder(@NonNull RecipeViewHolder holder, int position, @NonNull Recipe model) {
+                final String postKey = getRef(position).getKey();
+
                 holder.fullname.setText(model.getFullName());
                 holder.time.setText(String.format(" %s", model.getTime()));
                 holder.date.setText(String.format(" %s", model.getDate()));
                 holder.title.setText(model.getTitle());
                 holder.setRecipeImage(model.getRecipeImage());
                 holder.setProfileImage(model.getProfileImage());
+
+                holder.itemView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent clickPostIntent = new Intent(MainActivity.this, FullRecipeActivity.class);
+                        clickPostIntent.putExtra("postKey", postKey);
+                        startActivity(clickPostIntent);
+                    }
+                });
             }
 
             @NonNull
