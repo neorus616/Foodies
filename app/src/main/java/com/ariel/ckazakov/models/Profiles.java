@@ -1,4 +1,4 @@
-package com.ariel.ckazakov.foodies;
+package com.ariel.ckazakov.models;
 
 public class Profiles {
     public String profileimage, firstname, lastname;
