@@ -165,6 +165,14 @@ public class MainActivity extends AppCompatActivity {
                         });
                     }
                 });
+                holder.commentRecipeButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent commentsIntent = new Intent(MainActivity.this, CommentsActivity.class);
+                        commentsIntent.putExtra("postKey", postKey);
+                        startActivity(commentsIntent);
+                    }
+                });
             }
 
             @NonNull
@@ -272,7 +280,7 @@ public class MainActivity extends AppCompatActivity {
         CircleImageView user_post_image;
         ImageView post_image;
 
-        ImageButton likeRecipeButton, CommentRecipeButton;
+        ImageButton likeRecipeButton, commentRecipeButton;
         TextView numOfLikes;
         int countLikes;
         String currentUserUid;
@@ -284,7 +292,7 @@ public class MainActivity extends AppCompatActivity {
             view = itemView; //if something broken, comment this
 
             likeRecipeButton = view.findViewById(R.id.likeButton);
-            CommentRecipeButton = view.findViewById(R.id.commentButton);
+            commentRecipeButton = view.findViewById(R.id.commentButton);
             numOfLikes = view.findViewById(R.id.display_num_likes);
             likesRef = FirebaseDatabase.getInstance().getReference().child("Likes");
             currentUserUid = Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
