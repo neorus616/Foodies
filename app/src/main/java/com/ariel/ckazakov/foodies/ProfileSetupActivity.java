@@ -46,6 +46,7 @@ public class ProfileSetupActivity extends AppCompatActivity {
     private StorageReference UserProfileImageRef;
 
     private String currentUserID;
+    private Boolean updatedProfileImage = Boolean.FALSE;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,6 +63,9 @@ public class ProfileSetupActivity extends AppCompatActivity {
         save = findViewById(R.id.saveProfile);
         profileImage = findViewById(R.id.profile_image);
         loadingBar = new ProgressDialog(this);
+
+        if (getIntent().getExtras() != null)
+            updatedProfileImage = (Boolean) Objects.requireNonNull(getIntent().getExtras()).get("updatedProfileImage");
 
         save.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -88,7 +92,7 @@ public class ProfileSetupActivity extends AppCompatActivity {
                         String image = Objects.requireNonNull(dataSnapshot.child("profileimage").getValue()).toString();
                         Picasso.get().load(image).placeholder(R.drawable.profile).into(profileImage);
                     } else {
-                        Toast.makeText(ProfileSetupActivity.this, "Please select profile image first.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(ProfileSetupActivity.this, "Please select profile image first..", Toast.LENGTH_SHORT).show();
                     }
                 }
             }
@@ -142,6 +146,8 @@ public class ProfileSetupActivity extends AppCompatActivity {
                                                 public void onComplete(@NonNull Task<Void> task) {
                                                     if (task.isSuccessful()) {
                                                         Intent selfIntent = new Intent(ProfileSetupActivity.this, ProfileSetupActivity.class);
+                                                        updatedProfileImage = Boolean.TRUE;
+                                                        selfIntent.putExtra("updatedProfileImage", updatedProfileImage);
                                                         startActivity(selfIntent);
                                                         Toast.makeText(ProfileSetupActivity.this, "Profile image stored in Firebase Storage successfully ...", Toast.LENGTH_SHORT).show();
                                                     } else {
@@ -167,8 +173,9 @@ public class ProfileSetupActivity extends AppCompatActivity {
         String lastname = lastName.getText().toString();
         if (firstname.isEmpty()) {
             Toast.makeText(this, "Please write your first name...", Toast.LENGTH_SHORT).show();
-        }
-        if (lastname.isEmpty()) {
+        } else if (!updatedProfileImage) {
+            Toast.makeText(this, "Please enter your profile picture", Toast.LENGTH_SHORT).show();
+        } else if (lastname.isEmpty()) {
             Toast.makeText(this, "Please write your last name...", Toast.LENGTH_SHORT).show();
         } else {
             loadingBar.setTitle("Saving Information");

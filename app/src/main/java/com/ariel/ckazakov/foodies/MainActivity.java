@@ -251,7 +251,15 @@ public class MainActivity extends AppCompatActivity {
             case R.id.nav_find_friends:
                 SendUserToFindFriendsActivity();
                 break;
+            case R.id.nav_follows:
+                SendUserToFollowsActivity();
+                break;
         }
+    }
+
+    private void SendUserToFollowsActivity() {
+        Intent followActivity = new Intent(MainActivity.this, FollowActivity.class);
+        startActivity(followActivity);
     }
 
     private void SendUserToFindFriendsActivity() {

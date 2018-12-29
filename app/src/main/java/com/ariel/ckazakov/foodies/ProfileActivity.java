@@ -53,11 +53,13 @@ public class ProfileActivity extends AppCompatActivity {
         if (userKey != null && !userKey.equals(currentUserUid)) {
             userRef = FirebaseDatabase.getInstance().getReference().child("Users").child(userKey);
             followRef = FirebaseDatabase.getInstance().getReference().child("Follows");
+            followButton.setVisibility(View.VISIBLE);
+            unfollowButton.setVisibility(View.INVISIBLE);
             followRef.child(currentUserUid).addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     if (dataSnapshot.exists())
-                        if (dataSnapshot.child(userKey).child("Follow").getValue() != Boolean.TRUE) {
+                        if (dataSnapshot.child(userKey).child("Follow").getValue() == null) {
                             followButton.setVisibility(View.VISIBLE);
                             unfollowButton.setVisibility(View.INVISIBLE);
                         } else {
@@ -119,10 +121,10 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void UnfollowPerson() {
-        followRef.child(currentUserUid).child(userKey).child("Follow").setValue(Boolean.FALSE).addOnCompleteListener(new OnCompleteListener<Void>() {
+        followRef.child(currentUserUid).child(userKey).child("Follow").removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
-                followRef.child(userKey).child(currentUserUid).child("Follower").setValue(Boolean.FALSE).addOnCompleteListener(new OnCompleteListener<Void>() {
+                followRef.child(userKey).child(currentUserUid).child("Follower").removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         unfollowButton.setVisibility(View.INVISIBLE);

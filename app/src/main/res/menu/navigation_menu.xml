@@ -17,8 +17,8 @@
         android:icon="@drawable/home"/>
 
     <item
-        android:id="@+id/nav_friends"
-        android:title="Friends"
+        android:id="@+id/nav_follows"
+        android:title="My Follows"
         android:icon="@drawable/friends"/>
 
     <item
