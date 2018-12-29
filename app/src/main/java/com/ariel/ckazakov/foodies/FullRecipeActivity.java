@@ -43,7 +43,10 @@ public class FullRecipeActivity extends AppCompatActivity {
         postKey = Objects.requireNonNull(Objects.requireNonNull(getIntent().getExtras()).get("postKey")).toString();
         fullrecipedb = FirebaseDatabase.getInstance().getReference().child("Recipes").child(postKey);
         firebaseAuth = FirebaseAuth.getInstance();
-        currentUserUid = firebaseAuth.getCurrentUser().getUid();
+        if (FirebaseAuth.getInstance().getCurrentUser() != null)
+            currentUserUid = firebaseAuth.getCurrentUser().getUid();
+        else
+            currentUserUid = "";
 
         fullRecipeImage = findViewById(R.id.fullRecipeImage);
         fullRecipe = findViewById(R.id.fullRecipe);

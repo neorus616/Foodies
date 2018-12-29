@@ -54,16 +54,19 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+
 
         firebaseAuth = FirebaseAuth.getInstance();
         recipeRef = FirebaseDatabase.getInstance().getReference().child("Recipes");
         userRef = FirebaseDatabase.getInstance().getReference().child("Users");
         likesRef = FirebaseDatabase.getInstance().getReference().child("Likes");
-        if (firebaseAuth.getCurrentUser() != null)
+        if (firebaseAuth.getCurrentUser() != null) {
+            setContentView(R.layout.activity_main);
             currentUserID = firebaseAuth.getCurrentUser().getUid();
-        else currentUserID = "";
-
+        } else {
+            setContentView(R.layout.activity_main_guest);
+            currentUserID = "";
+        }
         toolbar = findViewById(R.id.main_page_toolbar);
         setSupportActionBar(toolbar);
         Objects.requireNonNull(getSupportActionBar()).setTitle("Home");
@@ -132,7 +135,12 @@ public class MainActivity extends AppCompatActivity {
                 holder.setTitle(model.getTitle());
                 holder.setRecipeImage(model.getRecipeImage());
                 holder.setProfileImage(model.getProfileImage());
-                holder.setLikeButtonStatus(postKey);
+                if (!currentUserID.isEmpty())
+                    holder.setLikeButtonStatus(postKey);
+                else {
+                    holder.likeRecipeButton.setVisibility(View.INVISIBLE);
+                    holder.commentRecipeButton.setVisibility(View.INVISIBLE);
+                }
 
                 holder.itemView.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -211,11 +219,11 @@ public class MainActivity extends AppCompatActivity {
 
         FirebaseUser user = firebaseAuth.getCurrentUser();
 
-        if (user == null) {
-            SendUserToLoginActivity();
-        } else {
-            CheckUserExistence();
-        }
+//        if (user == null) {
+//            SendUserToLoginActivity();
+//        } else {
+//            CheckUserExistence();
+//        }
     }
 
     @Override
@@ -254,6 +262,12 @@ public class MainActivity extends AppCompatActivity {
             case R.id.nav_follows:
                 SendUserToFollowsActivity();
                 break;
+            case R.id.nav_login:
+                SendUserToLoginActivity();
+                break;
+            case R.id.nav_register:
+                SendUserToRegisterActivity();
+                break;
         }
     }
 
@@ -282,6 +296,12 @@ public class MainActivity extends AppCompatActivity {
         startActivity(postActivity);
     }
 
+    private void SendUserToRegisterActivity() {
+        Intent registerIntent = new Intent(MainActivity.this, RegisterActivity.class);
+        startActivity(registerIntent);
+        finish();
+    }
+
     public static class RecipeViewHolder extends RecyclerView.ViewHolder {
         View view;
 
@@ -304,7 +324,12 @@ public class MainActivity extends AppCompatActivity {
             commentRecipeButton = view.findViewById(R.id.commentButton);
             numOfLikes = view.findViewById(R.id.display_num_likes);
             likesRef = FirebaseDatabase.getInstance().getReference().child("Likes");
-            currentUserUid = Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
+            if (FirebaseAuth.getInstance().getCurrentUser() != null)
+                currentUserUid = Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
+            else {
+                numOfLikes.setVisibility(View.INVISIBLE);
+                currentUserUid = "";
+            }
 
             fullname = view.findViewById(R.id.post_username);
             date = view.findViewById(R.id.post_date);
