@@ -117,7 +117,7 @@ public class PostActivity extends AppCompatActivity {
         saveCurrentTime = currentTime.format(calendarDate.getTime());
 
         final StorageReference path = db.child("Recipe Images")
-                .child(imageUri.getLastPathSegment() + saveCurrentDate + saveCurrentTime + ".jpg");
+                .child(saveCurrentDate + saveCurrentTime + imageUri.getLastPathSegment() + ".jpg");
         path.putFile(imageUri).continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
             @Override
             public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {

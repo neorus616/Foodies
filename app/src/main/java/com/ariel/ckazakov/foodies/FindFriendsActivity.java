@@ -71,7 +71,7 @@ public class FindFriendsActivity extends AppCompatActivity {
         FirebaseRecyclerAdapter<Profiles, FindFriendsActivity.FindFriendsViewHolder> firebaseRecyclerAdapter = new FirebaseRecyclerAdapter<Profiles, FindFriendsActivity.FindFriendsViewHolder>(options) {
             @Override
             protected void onBindViewHolder(@NonNull FindFriendsActivity.FindFriendsViewHolder holder, int position, @NonNull Profiles model) {
-                final String postKey = getRef(position).getKey();
+                final String userKey = getRef(position).getKey();
 
                 holder.setFullname(String.format("%s %s", model.getFirstname(), model.getLastname()));
                 holder.setProfileimage(model.getProfileimage());
@@ -80,7 +80,7 @@ public class FindFriendsActivity extends AppCompatActivity {
                     @Override
                     public void onClick(View v) {
                         Intent clickPostIntent = new Intent(FindFriendsActivity.this, ProfileActivity.class);
-                        clickPostIntent.putExtra("postKey", postKey);
+                        clickPostIntent.putExtra("userKey", userKey);
                         startActivity(clickPostIntent);
                     }
                 });

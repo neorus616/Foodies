@@ -14,6 +14,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -25,6 +26,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
@@ -41,11 +43,12 @@ public class MainActivity extends AppCompatActivity {
     private ActionBarDrawerToggle actionBarDrawerToggle;
 
     private FirebaseAuth firebaseAuth;
-    private DatabaseReference recipeRef, userRef;
+    private DatabaseReference recipeRef, userRef, likesRef;
 
     private CircleImageView navProfileImage;
     private TextView navProfileUser;
     private String currentUserID;
+    private Boolean likeChecker = Boolean.FALSE;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,6 +58,7 @@ public class MainActivity extends AppCompatActivity {
         firebaseAuth = FirebaseAuth.getInstance();
         recipeRef = FirebaseDatabase.getInstance().getReference().child("Recipes");
         userRef = FirebaseDatabase.getInstance().getReference().child("Users");
+        likesRef = FirebaseDatabase.getInstance().getReference().child("Likes");
         if (firebaseAuth.getCurrentUser() != null)
             currentUserID = firebaseAuth.getCurrentUser().getUid();
         else currentUserID = "";
@@ -114,18 +118,20 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void displayAllRecipes() {
-        FirebaseRecyclerOptions<Recipe> options = new FirebaseRecyclerOptions.Builder<Recipe>().setQuery(recipeRef, Recipe.class).build();
+        Query searchFriendsQuery = recipeRef.orderByKey();
+        FirebaseRecyclerOptions<Recipe> options = new FirebaseRecyclerOptions.Builder<Recipe>().setQuery(searchFriendsQuery, Recipe.class).build();
         FirebaseRecyclerAdapter<Recipe, RecipeViewHolder> firebaseRecyclerAdapter = new FirebaseRecyclerAdapter<Recipe, RecipeViewHolder>(options) {
             @Override
             protected void onBindViewHolder(@NonNull RecipeViewHolder holder, int position, @NonNull Recipe model) {
                 final String postKey = getRef(position).getKey();
 
-                holder.fullname.setText(model.getFullName());
-                holder.time.setText(String.format(" %s", model.getTime()));
-                holder.date.setText(String.format(" %s", model.getDate()));
-                holder.title.setText(model.getTitle());
+                holder.setFullname(model.getFullName());
+                holder.setTime(String.format(" %s", model.getTime()));
+                holder.setDate(String.format(" %s", model.getDate()));
+                holder.setTitle(model.getTitle());
                 holder.setRecipeImage(model.getRecipeImage());
                 holder.setProfileImage(model.getProfileImage());
+                holder.setLikeButtonStatus(postKey);
 
                 holder.itemView.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -133,6 +139,30 @@ public class MainActivity extends AppCompatActivity {
                         Intent clickPostIntent = new Intent(MainActivity.this, FullRecipeActivity.class);
                         clickPostIntent.putExtra("postKey", postKey);
                         startActivity(clickPostIntent);
+                    }
+                });
+                holder.likeRecipeButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        likeChecker = Boolean.TRUE;
+                        likesRef.addValueEventListener(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                if (likeChecker)
+                                    if (dataSnapshot.child(Objects.requireNonNull(postKey)).hasChild(currentUserID)) {
+                                        likesRef.child(postKey).child(currentUserID).removeValue();
+                                        likeChecker = Boolean.FALSE;
+                                    } else {
+                                        likesRef.child(postKey).child(currentUserID).setValue(Boolean.TRUE);
+                                        likeChecker = Boolean.FALSE;
+                                    }
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                            }
+                        });
                     }
                 });
             }
@@ -236,19 +266,35 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public static class RecipeViewHolder extends RecyclerView.ViewHolder {
+        View view;
+
         TextView fullname, date, time, title;
         CircleImageView user_post_image;
         ImageView post_image;
 
+        ImageButton likeRecipeButton, CommentRecipeButton;
+        TextView numOfLikes;
+        int countLikes;
+        String currentUserUid;
+        DatabaseReference likesRef;
+
         RecipeViewHolder(View itemView) {
             super(itemView);
 
-            fullname = itemView.findViewById(R.id.post_username);
-            date = itemView.findViewById(R.id.post_date);
-            time = itemView.findViewById(R.id.post_time);
-            title = itemView.findViewById(R.id.post_title);
-            post_image = itemView.findViewById(R.id.post_image);
-            user_post_image = itemView.findViewById(R.id.post_profile_image);
+            view = itemView; //if something broken, comment this
+
+            likeRecipeButton = view.findViewById(R.id.likeButton);
+            CommentRecipeButton = view.findViewById(R.id.commentButton);
+            numOfLikes = view.findViewById(R.id.display_num_likes);
+            likesRef = FirebaseDatabase.getInstance().getReference().child("Likes");
+            currentUserUid = Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
+
+            fullname = view.findViewById(R.id.post_username);
+            date = view.findViewById(R.id.post_date);
+            time = view.findViewById(R.id.post_time);
+            title = view.findViewById(R.id.post_title);
+            post_image = view.findViewById(R.id.post_image);
+            user_post_image = view.findViewById(R.id.post_profile_image);
         }
 
         public void setFullname(String fullname) {
@@ -281,7 +327,27 @@ public class MainActivity extends AppCompatActivity {
             Picasso.get().load(recipeimage).placeholder(R.drawable.add_post_high).into(recipeImage);
         }
 
+        public void setLikeButtonStatus(final String postKey) {
+            likesRef.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    if (dataSnapshot.child(postKey).hasChild(currentUserUid)) {
+                        countLikes = (int) dataSnapshot.child(postKey).getChildrenCount();
+                        likeRecipeButton.setImageResource(R.drawable.like);
+                        numOfLikes.setText(String.format("%s Likes", String.valueOf(countLikes)));
+                    } else {
+                        countLikes = (int) dataSnapshot.child(postKey).getChildrenCount();
+                        likeRecipeButton.setImageResource(R.drawable.dislike);
+                        numOfLikes.setText(String.format("%s Likes", String.valueOf(countLikes)));
+                    }
+                }
 
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
+        }
     }
 
     private void SendUserToProfileSetupActivity() {

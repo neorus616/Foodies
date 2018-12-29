@@ -25,7 +25,7 @@ public class ProfileActivity extends AppCompatActivity {
     private DatabaseReference userRef;
     private FirebaseAuth firebaseAuth;
 
-    private String currentUserUid, postKey;
+    private String currentUserUid, userKey;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,11 +36,11 @@ public class ProfileActivity extends AppCompatActivity {
         profilePic = findViewById(R.id.profile_pic_public);
 
         if (getIntent().getExtras() != null)
-            postKey = Objects.requireNonNull(getIntent().getExtras().get("postKey")).toString();
+            userKey = Objects.requireNonNull(getIntent().getExtras().get("userKey")).toString();
         firebaseAuth = FirebaseAuth.getInstance();
         currentUserUid = Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid();
-        if (postKey != null)
-            userRef = FirebaseDatabase.getInstance().getReference().child("Users").child(postKey);
+        if (userKey != null)
+            userRef = FirebaseDatabase.getInstance().getReference().child("Users").child(userKey);
         else
             userRef = FirebaseDatabase.getInstance().getReference().child("Users").child(currentUserUid);
 
