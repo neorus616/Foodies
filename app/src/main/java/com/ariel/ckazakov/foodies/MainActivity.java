@@ -209,7 +209,15 @@ public class MainActivity extends AppCompatActivity {
             case R.id.nav_profile:
                 SendUserToProfileActivity();
                 break;
+            case R.id.nav_find_friends:
+                SendUserToFindFriendsActivity();
+                break;
         }
+    }
+
+    private void SendUserToFindFriendsActivity() {
+        Intent profileActivity = new Intent(MainActivity.this, FindFriendsActivity.class);
+        startActivity(profileActivity);
     }
 
     private void SendUserToProfileActivity() {
@@ -265,12 +273,12 @@ public class MainActivity extends AppCompatActivity {
 
         public void setProfileImage(String profileimage) {
             CircleImageView image = itemView.findViewById(R.id.post_profile_image);
-            Picasso.get().load(profileimage).into(image);
+            Picasso.get().load(profileimage).placeholder(R.drawable.profile).into(image);
         }
 
         public void setRecipeImage(String recipeimage) {
             ImageView recipeImage = itemView.findViewById(R.id.post_image);
-            Picasso.get().load(recipeimage).into(recipeImage);
+            Picasso.get().load(recipeimage).placeholder(R.drawable.add_post_high).into(recipeImage);
         }
 
 

@@ -1,8 +1,8 @@
 package com.ariel.ckazakov.foodies;
 
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -25,7 +25,7 @@ public class ProfileActivity extends AppCompatActivity {
     private DatabaseReference userRef;
     private FirebaseAuth firebaseAuth;
 
-    private String currentUserUid;
+    private String currentUserUid, postKey;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,9 +35,14 @@ public class ProfileActivity extends AppCompatActivity {
         fullname = findViewById(R.id.profile_fullname_public);
         profilePic = findViewById(R.id.profile_pic_public);
 
+        if (getIntent().getExtras() != null)
+            postKey = Objects.requireNonNull(getIntent().getExtras().get("postKey")).toString();
         firebaseAuth = FirebaseAuth.getInstance();
         currentUserUid = Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid();
-        userRef = FirebaseDatabase.getInstance().getReference().child("Users").child(currentUserUid);
+        if (postKey != null)
+            userRef = FirebaseDatabase.getInstance().getReference().child("Users").child(postKey);
+        else
+            userRef = FirebaseDatabase.getInstance().getReference().child("Users").child(currentUserUid);
 
         userRef.addValueEventListener(new ValueEventListener() {
             @Override
