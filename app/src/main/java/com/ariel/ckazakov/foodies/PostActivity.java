@@ -38,8 +38,7 @@ public class PostActivity extends AppCompatActivity {
 
     private ImageButton recipeImage;
     private Button button;
-    private EditText recipe;
-    private EditText title;
+    private EditText recipe, title;
 
     private Toolbar toolbar;
     private ProgressDialog loadingBar;
@@ -47,9 +46,8 @@ public class PostActivity extends AppCompatActivity {
     private StorageReference db;
     private DatabaseReference userRef, recipeRef;
     private FirebaseAuth firebaseAuth;
-    private String downloadUrl;
-    private String saveCurrentTime;
-    private String saveCurrentDate;
+    private String downloadUrl, saveCurrentTime, saveCurrentDate;
+    private long postCounter = 0;
     private Uri imageUri;
 
 
@@ -142,6 +140,19 @@ public class PostActivity extends AppCompatActivity {
     }
 
     private void SaveRecipeToDB() {
+        recipeRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    postCounter = dataSnapshot.getChildrenCount();
+                } else postCounter = 0;
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
         userRef.child(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid()).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -158,6 +169,7 @@ public class PostActivity extends AppCompatActivity {
                     posts.put("profileimage", Objects.requireNonNull(dataSnapshot.child("profileimage").getValue()).toString());
                     posts.put("fullname", userFullName);
                     posts.put("title", title.getText().toString());
+                    posts.put("counter", postCounter);
                     recipeRef.child(currentUserUid + "" + saveCurrentDate + "" + saveCurrentTime).updateChildren(posts).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {

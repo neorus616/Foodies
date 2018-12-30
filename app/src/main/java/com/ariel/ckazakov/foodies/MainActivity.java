@@ -122,8 +122,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void displayAllRecipes() {
-        Query searchFriendsQuery = recipeRef.orderByKey();
-        FirebaseRecyclerOptions<Recipe> options = new FirebaseRecyclerOptions.Builder<Recipe>().setQuery(searchFriendsQuery, Recipe.class).build();
+        Query sortByNew = recipeRef.orderByChild("counter");
+        FirebaseRecyclerOptions<Recipe> options = new FirebaseRecyclerOptions.Builder<Recipe>().setQuery(sortByNew, Recipe.class).build();
         FirebaseRecyclerAdapter<Recipe, RecipeViewHolder> firebaseRecyclerAdapter = new FirebaseRecyclerAdapter<Recipe, RecipeViewHolder>(options) {
             @Override
             protected void onBindViewHolder(@NonNull RecipeViewHolder holder, int position, @NonNull Recipe model) {
@@ -219,11 +219,8 @@ public class MainActivity extends AppCompatActivity {
 
         FirebaseUser user = firebaseAuth.getCurrentUser();
 
-//        if (user == null) {
-//            SendUserToLoginActivity();
-//        } else {
-//            CheckUserExistence();
-//        }
+        if (user != null)
+            CheckUserExistence();
     }
 
     @Override
