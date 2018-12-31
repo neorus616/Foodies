@@ -3,12 +3,13 @@ package com.ariel.ckazakov.models;
 public class Recipe {
 
     private String uid, time, date, recipeimage, recipe, fullname, profileimage, title;
+    int counter;
 
     public Recipe() {
 
     }
 
-    public Recipe(String uid, String time, String date, String recipeimage, String recipe, String fullname, String profileimage, String title) {
+    public Recipe(String uid, String time, String date, String recipeimage, String recipe, String fullname, String profileimage, String title, int counter) {
         this.uid = uid;
         this.time = time;
         this.date = date;
@@ -17,6 +18,7 @@ public class Recipe {
         this.fullname = fullname;
         this.profileimage = profileimage;
         this.title = title;
+        this.counter = counter;
     }
 
     public String getUid() {
@@ -81,6 +83,14 @@ public class Recipe {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public int getCounter() {
+        return counter;
+    }
+
+    public void setCounter(int counter) {
+        this.counter = counter;
     }
 
 }

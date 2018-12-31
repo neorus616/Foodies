@@ -107,8 +107,8 @@ public class MainActivity extends AppCompatActivity {
         recyclerView = findViewById(R.id.all_users_post_list);
         recyclerView.setHasFixedSize(Boolean.TRUE);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
-        linearLayoutManager.setReverseLayout(Boolean.FALSE);
-        linearLayoutManager.setStackFromEnd(Boolean.FALSE);
+        linearLayoutManager.setReverseLayout(true);
+        linearLayoutManager.setStackFromEnd(true);
         recyclerView.setLayoutManager(linearLayoutManager);
 
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
@@ -315,7 +315,7 @@ public class MainActivity extends AppCompatActivity {
         RecipeViewHolder(View itemView) {
             super(itemView);
 
-            view = itemView; //if something broken, comment this
+            view = itemView;
 
             likeRecipeButton = view.findViewById(R.id.likeButton);
             commentRecipeButton = view.findViewById(R.id.commentButton);

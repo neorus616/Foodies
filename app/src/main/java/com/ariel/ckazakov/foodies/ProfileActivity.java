@@ -1,5 +1,6 @@
 package com.ariel.ckazakov.foodies;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -25,12 +26,13 @@ public class ProfileActivity extends AppCompatActivity {
 
     private TextView fullname;
     private CircleImageView profilePic;
-    private Button followButton, unfollowButton;
+    private Button followButton, unfollowButton, myPosts, myFollows;
 
     private DatabaseReference userRef, followRef;
     private FirebaseAuth firebaseAuth;
 
     private String currentUserUid, userKey;
+    private long numOfFollowers = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +43,16 @@ public class ProfileActivity extends AppCompatActivity {
         profilePic = findViewById(R.id.profile_pic_public);
         followButton = findViewById(R.id.follow_button);
         unfollowButton = findViewById(R.id.unfollow_button);
+        myPosts = findViewById(R.id.myPosts);
+        myFollows = findViewById(R.id.myFollows);
+        followRef = FirebaseDatabase.getInstance().getReference().child("Follows");
+
+        myPosts.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SendUserToMyPostsActivity();
+            }
+        });
 
         if (getIntent().getExtras() != null)
             userKey = Objects.requireNonNull(getIntent().getExtras().get("userKey")).toString();
@@ -52,20 +64,13 @@ public class ProfileActivity extends AppCompatActivity {
          */
         if (userKey != null && !userKey.equals(currentUserUid)) {
             userRef = FirebaseDatabase.getInstance().getReference().child("Users").child(userKey);
-            followRef = FirebaseDatabase.getInstance().getReference().child("Follows");
             followButton.setVisibility(View.VISIBLE);
             unfollowButton.setVisibility(View.INVISIBLE);
-            followRef.child(currentUserUid).addValueEventListener(new ValueEventListener() {
+            followRef.child(userKey).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    if (dataSnapshot.exists())
-                        if (dataSnapshot.child(userKey).child("Follow").getValue() == null) {
-                            followButton.setVisibility(View.VISIBLE);
-                            unfollowButton.setVisibility(View.INVISIBLE);
-                        } else {
-                            followButton.setVisibility(View.INVISIBLE);
-                            unfollowButton.setVisibility(View.VISIBLE);
-                        }
+                    numOfFollowers = dataSnapshot.getChildrenCount();
+                    myFollows.setText(String.format("%s Followers", String.valueOf(numOfFollowers)));
                 }
 
                 @Override
@@ -73,14 +78,51 @@ public class ProfileActivity extends AppCompatActivity {
 
                 }
             });
+            followRef.child(currentUserUid).addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    if (dataSnapshot.exists()) {
+                        if (dataSnapshot.child(userKey).child("Follow").getValue() == null) {
+                            followButton.setVisibility(View.VISIBLE);
+                            unfollowButton.setVisibility(View.INVISIBLE);
+                        } else {
+                            followButton.setVisibility(View.INVISIBLE);
+                            unfollowButton.setVisibility(View.VISIBLE);
+                        }
+                    }
+                }
 
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
         /*
         my profile
          */
         } else {
+            followRef.child(currentUserUid).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    numOfFollowers = dataSnapshot.getChildrenCount();
+                    myFollows.setText(String.format("%s Followers", String.valueOf(numOfFollowers)));
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
             userRef = FirebaseDatabase.getInstance().getReference().child("Users").child(currentUserUid);
             followButton.setVisibility(View.INVISIBLE);
             unfollowButton.setVisibility(View.INVISIBLE);
+
+            myFollows.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    SendUserToFollowsActivity();
+                }
+            });
         }
 
         userRef.addValueEventListener(new ValueEventListener() {
@@ -148,5 +190,15 @@ public class ProfileActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    private void SendUserToFollowsActivity() {
+        Intent followActivity = new Intent(ProfileActivity.this, FollowActivity.class);
+        startActivity(followActivity);
+    }
+
+    private void SendUserToMyPostsActivity() {
+        Intent followActivity = new Intent(ProfileActivity.this, MyPostsActivity.class);
+        startActivity(followActivity);
     }
 }

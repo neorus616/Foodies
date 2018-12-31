@@ -61,7 +61,7 @@ public class FullRecipeActivity extends AppCompatActivity {
                 if (dataSnapshot.exists()) {
                     recipe = Objects.requireNonNull(dataSnapshot.child("recipe").getValue()).toString();
                     image = Objects.requireNonNull(dataSnapshot.child("recipeimage").getValue()).toString();
-                    dbUserUid = dataSnapshot.child("uid").getValue().toString();
+                    dbUserUid = Objects.requireNonNull(dataSnapshot.child("uid").getValue()).toString();
 
                     fullRecipe.setText(recipe);
                     Picasso.get().load(image).into(fullRecipeImage);

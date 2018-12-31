@@ -105,6 +105,7 @@ public class FollowActivity extends AppCompatActivity {
         }
 
         public void setFollow(String follow) {
+
         }
     }
 }
