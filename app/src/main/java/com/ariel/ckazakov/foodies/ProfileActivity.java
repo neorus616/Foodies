@@ -1,8 +1,10 @@
 package com.ariel.ckazakov.foodies;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
@@ -28,11 +30,11 @@ public class ProfileActivity extends AppCompatActivity {
     private CircleImageView profilePic;
     private Button followButton, unfollowButton, myPosts, myFollows;
 
-    private DatabaseReference userRef, followRef;
+    private DatabaseReference userRef, followRef, recipeRef;
     private FirebaseAuth firebaseAuth;
 
     private String currentUserUid, userKey;
-    private long numOfFollowers = 0;
+    private long numOfFollowers = 0, numOfRecipes;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +48,12 @@ public class ProfileActivity extends AppCompatActivity {
         myPosts = findViewById(R.id.myPosts);
         myFollows = findViewById(R.id.myFollows);
         followRef = FirebaseDatabase.getInstance().getReference().child("Follows");
+        recipeRef = FirebaseDatabase.getInstance().getReference().child("Recipes");
+
+        if (getIntent().getExtras() != null)
+            userKey = Objects.requireNonNull(getIntent().getExtras().get("userKey")).toString();
+        firebaseAuth = FirebaseAuth.getInstance();
+        currentUserUid = Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid();
 
         myPosts.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -54,22 +62,38 @@ public class ProfileActivity extends AppCompatActivity {
             }
         });
 
-        if (getIntent().getExtras() != null)
-            userKey = Objects.requireNonNull(getIntent().getExtras().get("userKey")).toString();
-        firebaseAuth = FirebaseAuth.getInstance();
-        currentUserUid = Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid();
-
         /*
         other profiles
          */
         if (userKey != null && !userKey.equals(currentUserUid)) {
+            recipeRef.orderByChild("uid").startAt(userKey).endAt(userKey + "\uf8ff").addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    if (dataSnapshot.exists()) {
+                        numOfRecipes = (int) dataSnapshot.getChildrenCount();
+                        myPosts.setText(String.format("%s Recipes", String.valueOf(numOfRecipes)));
+                    } else {
+                        myPosts.setText("0 Recipes");
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
+
             userRef = FirebaseDatabase.getInstance().getReference().child("Users").child(userKey);
             followButton.setVisibility(View.VISIBLE);
             unfollowButton.setVisibility(View.INVISIBLE);
             followRef.child(userKey).addListenerForSingleValueEvent(new ValueEventListener() {
+                @RequiresApi(api = Build.VERSION_CODES.N)
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    numOfFollowers = dataSnapshot.getChildrenCount();
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        if (Objects.requireNonNull(snapshot.getValue()).toString().contains("Follower"))
+                            numOfFollowers++;
+                    }
                     myFollows.setText(String.format("%s Followers", String.valueOf(numOfFollowers)));
                 }
 
@@ -101,10 +125,31 @@ public class ProfileActivity extends AppCompatActivity {
         my profile
          */
         } else {
-            followRef.child(currentUserUid).addListenerForSingleValueEvent(new ValueEventListener() {
+            recipeRef.orderByChild("uid").startAt(currentUserUid).endAt(currentUserUid + "\uf8ff").addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    numOfFollowers = dataSnapshot.getChildrenCount();
+                    if (dataSnapshot.exists()) {
+                        numOfRecipes = (int) dataSnapshot.getChildrenCount();
+                        myPosts.setText(String.format("%s Recipes", String.valueOf(numOfRecipes)));
+                    } else {
+                        myPosts.setText("0 Recipes");
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
+
+            followRef.child(currentUserUid).addListenerForSingleValueEvent(new ValueEventListener() {
+                @RequiresApi(api = Build.VERSION_CODES.N)
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        if (Objects.requireNonNull(snapshot.getValue()).toString().contains("Follower"))
+                            numOfFollowers++;
+                    }
                     myFollows.setText(String.format("%s Followers", String.valueOf(numOfFollowers)));
                 }
 
@@ -198,7 +243,8 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void SendUserToMyPostsActivity() {
-        Intent followActivity = new Intent(ProfileActivity.this, MyPostsActivity.class);
-        startActivity(followActivity);
+        Intent myPostsActivity = new Intent(ProfileActivity.this, MyPostsActivity.class);
+        myPostsActivity.putExtra("userKey", userKey);
+        startActivity(myPostsActivity);
     }
 }
