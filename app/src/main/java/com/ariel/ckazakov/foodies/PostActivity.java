@@ -9,10 +9,14 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.Continuation;
@@ -29,8 +33,10 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
@@ -50,11 +56,55 @@ public class PostActivity extends AppCompatActivity {
     private long postCounter = 0;
     private Uri imageUri;
 
+    private ListView listView;
+    private EditText getValue;
+    private ImageButton addButton;
+    private List<String> listElementsArrayList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recipe);
+
+        listView = findViewById(R.id.ingredient_list);
+        addButton = findViewById(R.id.button_ingredient);
+        getValue = findViewById(R.id.add_ingredient);
+        listElementsArrayList = new ArrayList<>();
+        final ArrayAdapter<String> adapter = new ArrayAdapter<>
+                (PostActivity.this, android.R.layout.simple_list_item_1,
+                        listElementsArrayList);
+
+        listView.setAdapter(adapter);
+
+        addButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                listElementsArrayList.add(getValue.getText().toString());
+                adapter.notifyDataSetChanged();
+                getValue.setText("");
+            }
+        });
+
+        listView.setOnTouchListener(new View.OnTouchListener() {
+            // Setting on Touch Listener for handling the touch inside ScrollView
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                // Disallow the touch request for parent scroll on touch of child view
+                v.getParent().requestDisallowInterceptTouchEvent(true);
+                return false;
+            }
+
+        });
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                listElementsArrayList.remove(position);
+                adapter.notifyDataSetChanged();
+            }
+        });
+
 
         recipeImage = findViewById(R.id.recipeImage);
         button = findViewById(R.id.createRecipe);
@@ -96,6 +146,8 @@ public class PostActivity extends AppCompatActivity {
             Toast.makeText(this, "You must upload an image of the recipe", Toast.LENGTH_SHORT).show();
         else if (recipe.getText().toString().isEmpty())
             Toast.makeText(this, "You must write the recipe", Toast.LENGTH_SHORT).show();
+        else if (listElementsArrayList.isEmpty())
+            Toast.makeText(this, "You must add at least one ingredient", Toast.LENGTH_SHORT).show();
         else if (title.getText().toString().isEmpty())
             Toast.makeText(this, "You must write the title", Toast.LENGTH_SHORT).show();
         else {
@@ -169,6 +221,7 @@ public class PostActivity extends AppCompatActivity {
                     posts.put("profileimage", Objects.requireNonNull(dataSnapshot.child("profileimage").getValue()).toString());
                     posts.put("fullname", userFullName);
                     posts.put("title", title.getText().toString());
+                    posts.put("ingredients", listElementsArrayList);
                     posts.put("counter", postCounter);
                     recipeRef.child(currentUserUid + "" + saveCurrentDate + "" + saveCurrentTime).updateChildren(posts).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override

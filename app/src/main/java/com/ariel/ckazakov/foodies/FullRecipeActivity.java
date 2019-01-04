@@ -19,18 +19,21 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
+import java.util.List;
 import java.util.Objects;
 
 public class FullRecipeActivity extends AppCompatActivity {
 
     private ImageView fullRecipeImage;
-    private TextView fullRecipe;
+    private TextView fullRecipe, listIngredients;
     private Button deleteButton, editButton;
 
     private String postKey, currentUserUid, dbUserUid, recipe, image;
+    private List<String> listElementsArrayList;
 
     private DatabaseReference fullrecipedb;
     private FirebaseAuth firebaseAuth;
@@ -50,6 +53,7 @@ public class FullRecipeActivity extends AppCompatActivity {
 
         fullRecipeImage = findViewById(R.id.fullRecipeImage);
         fullRecipe = findViewById(R.id.fullRecipe);
+        listIngredients = findViewById(R.id.listFullIngredients);
         deleteButton = findViewById(R.id.deleteButton);
         deleteButton.setVisibility(View.INVISIBLE);
         editButton = findViewById(R.id.editButton);
@@ -62,7 +66,15 @@ public class FullRecipeActivity extends AppCompatActivity {
                     recipe = Objects.requireNonNull(dataSnapshot.child("recipe").getValue()).toString();
                     image = Objects.requireNonNull(dataSnapshot.child("recipeimage").getValue()).toString();
                     dbUserUid = Objects.requireNonNull(dataSnapshot.child("uid").getValue()).toString();
+                    GenericTypeIndicator<List<String>> t = new GenericTypeIndicator<List<String>>() {
+                    };
+                    listElementsArrayList = dataSnapshot.child("ingredients").getValue(t);
 
+                    StringBuilder ingredients = new StringBuilder();
+                    for (int i = 0; i < listElementsArrayList.size() - 1; i++)
+                        ingredients.append(listElementsArrayList.get(i)).append(", ");
+                    ingredients.append(listElementsArrayList.get(listElementsArrayList.size() - 1));
+                    listIngredients.setText(ingredients);
                     fullRecipe.setText(recipe);
                     Picasso.get().load(image).into(fullRecipeImage);
                     if (currentUserUid.equals(dbUserUid)) {

@@ -29,12 +29,44 @@
                 app:srcCompat="@drawable/select_image" />
 
             <TextView
-                android:id="@+id/fullRecipe"
+                android:id="@+id/fullIngredientsTitle"
                 android:layout_width="match_parent"
                 android:layout_marginLeft="3dp"
                 android:layout_marginRight="3dp"
+                android:text="Ingredients:"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/fullRecipeImage"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/listFullIngredients"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/fullIngredientsTitle"
+                android:layout_marginLeft="3dp"
+                android:layout_marginRight="3dp"
+                android:text="Ingredients"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/fullRecipeTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/listFullIngredients"
+                android:layout_marginLeft="3dp"
+                android:layout_marginRight="3dp"
+                android:text="Recipe:"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/fullRecipe"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/fullRecipeTitle"
+                android:layout_marginLeft="3dp"
+                android:layout_marginRight="3dp"
                 android:text="Recipe"
                 android:textSize="18sp" />
 
