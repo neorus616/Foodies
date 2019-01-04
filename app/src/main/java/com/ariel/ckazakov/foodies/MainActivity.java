@@ -275,20 +275,21 @@ public class MainActivity extends AppCompatActivity {
             case R.id.nav_hot:
                 SendUserToMainActivityHot();
                 break;
+            case R.id.search:
+                SendUserToFindRecipesActivity();
+                break;
         }
+    }
+
+    private void SendUserToFindRecipesActivity() {
+        Intent findRecipesActivity = new Intent(MainActivity.this, FindRecipesActivity.class);
+        startActivity(findRecipesActivity);
     }
 
     private void SendUserToMainActivityNew() {
         Intent mainActivity = new Intent(MainActivity.this, MainActivity.class);
         mainActivity.putExtra("content", "new");
         startActivity(mainActivity);
-        finish();
-    }
-
-    private void SendUserToProfileSetupActivity() {
-        Intent setupIntent = new Intent(MainActivity.this, ProfileSetupActivity.class);
-        setupIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(setupIntent);
         finish();
     }
 
@@ -299,14 +300,21 @@ public class MainActivity extends AppCompatActivity {
         finish();
     }
 
+    private void SendUserToProfileSetupActivity() {
+        Intent profileSetupIntent = new Intent(MainActivity.this, ProfileSetupActivity.class);
+        profileSetupIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(profileSetupIntent);
+        finish();
+    }
+
     private void SendUserToFollowsActivity() {
         Intent followActivity = new Intent(MainActivity.this, FollowActivity.class);
         startActivity(followActivity);
     }
 
     private void SendUserToFindFriendsActivity() {
-        Intent profileActivity = new Intent(MainActivity.this, FindFriendsActivity.class);
-        startActivity(profileActivity);
+        Intent findFriendsActivity = new Intent(MainActivity.this, FindFriendsActivity.class);
+        startActivity(findFriendsActivity);
     }
 
     private void SendUserToProfileActivity() {

@@ -29,6 +29,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
@@ -137,7 +138,6 @@ public class PostActivity extends AppCompatActivity {
                 validateRecipe();
             }
         });
-
     }
 
     private void validateRecipe() {
@@ -168,7 +168,13 @@ public class PostActivity extends AppCompatActivity {
 
         final StorageReference path = db.child("Recipe Images")
                 .child(saveCurrentDate + saveCurrentTime + imageUri.getLastPathSegment() + ".jpg");
-        path.putFile(imageUri).continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+        path.putFile(imageUri).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+                double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
+                loadingBar.setMessage("Uploaded " + ((int) progress) + "%...");
+            }
+        }).continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
             @Override
             public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
                 if (!task.isSuccessful()) {
@@ -180,6 +186,7 @@ public class PostActivity extends AppCompatActivity {
             @Override
             public void onComplete(@NonNull Task<Uri> task) {
                 if (task.isSuccessful()) {
+                    loadingBar.dismiss();
                     Uri downloadUri = task.getResult();
                     downloadUrl = Objects.requireNonNull(downloadUri).toString();
                     Toast.makeText(PostActivity.this, "Image uploaded successfully", Toast.LENGTH_SHORT).show();

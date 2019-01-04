@@ -27,6 +27,11 @@
         android:icon="@drawable/find_people"/>
 
     <item
+        android:id="@+id/search"
+        android:icon="@drawable/search"
+        android:title="Search recipes" />
+
+    <item
         android:id="@+id/nav_settings"
         android:title="Settings"
         android:icon="@drawable/settings"/>

@@ -35,7 +35,7 @@ public class FullRecipeActivity extends AppCompatActivity {
     private String postKey, currentUserUid, dbUserUid, recipe, image;
     private List<String> listElementsArrayList;
 
-    private DatabaseReference fullrecipedb;
+    private DatabaseReference fullrecipedb, adminRef;
     private FirebaseAuth firebaseAuth;
 
     @Override
@@ -50,6 +50,7 @@ public class FullRecipeActivity extends AppCompatActivity {
             currentUserUid = Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid();
         else
             currentUserUid = "";
+        adminRef = FirebaseDatabase.getInstance().getReference().child("Admins");
 
         fullRecipeImage = findViewById(R.id.fullRecipeImage);
         fullRecipe = findViewById(R.id.fullRecipe);
@@ -73,12 +74,28 @@ public class FullRecipeActivity extends AppCompatActivity {
                     StringBuilder ingredients = new StringBuilder();
                     if (listElementsArrayList != null) {
                         for (int i = 0; i < listElementsArrayList.size() - 1; i++)
-                            ingredients.append(listElementsArrayList.get(i)).append(", ");
+                            ingredients.append(listElementsArrayList.get(i)).append("\n");
                         ingredients.append(listElementsArrayList.get(listElementsArrayList.size() - 1));
                     }
                     listIngredients.setText(ingredients);
                     fullRecipe.setText(recipe);
                     Picasso.get().load(image).into(fullRecipeImage);
+
+                    adminRef.addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            if (dataSnapshot.child(currentUserUid).exists()) {
+                                deleteButton.setVisibility(View.VISIBLE);
+                                editButton.setVisibility(View.VISIBLE);
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                        }
+                    });
+
                     if (currentUserUid.equals(dbUserUid)) {
                         deleteButton.setVisibility(View.VISIBLE);
                         editButton.setVisibility(View.VISIBLE);

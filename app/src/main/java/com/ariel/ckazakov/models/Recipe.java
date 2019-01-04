@@ -1,15 +1,18 @@
 package com.ariel.ckazakov.models;
 
+import java.util.ArrayList;
+
 public class Recipe {
 
     private String uid, time, date, recipeimage, recipe, fullname, profileimage, title;
-    int counter;
+    private int counter;
+    private ArrayList<String> ingredients;
 
     public Recipe() {
 
     }
 
-    public Recipe(String uid, String time, String date, String recipeimage, String recipe, String fullname, String profileimage, String title, int counter) {
+    public Recipe(String uid, String time, String date, String recipeimage, String recipe, String fullname, String profileimage, String title, int counter, ArrayList<String> ingredients) {
         this.uid = uid;
         this.time = time;
         this.date = date;
@@ -19,6 +22,15 @@ public class Recipe {
         this.profileimage = profileimage;
         this.title = title;
         this.counter = counter;
+        this.ingredients = ingredients;
+    }
+
+    public ArrayList<String> getIngredients() {
+        return ingredients;
+    }
+
+    public void setIngredients(ArrayList<String> ingredients) {
+        this.ingredients = ingredients;
     }
 
     public String getUid() {
