@@ -1,5 +1,6 @@
 package com.ariel.ckazakov.foodies;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -21,6 +22,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
+import java.util.Objects;
+
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class FollowActivity extends AppCompatActivity {
@@ -36,7 +39,7 @@ public class FollowActivity extends AppCompatActivity {
         setContentView(R.layout.activity_follow);
 
         firebaseAuth = FirebaseAuth.getInstance();
-        currentUserUid = firebaseAuth.getCurrentUser().getUid();
+        currentUserUid = Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid();
         followRef = FirebaseDatabase.getInstance().getReference().child("Follows").child(currentUserUid);
         userRef = FirebaseDatabase.getInstance().getReference().child("Users");
 
@@ -57,14 +60,24 @@ public class FollowActivity extends AppCompatActivity {
             protected void onBindViewHolder(@NonNull final FollowActivity.FollowViewHolder holder, int position, @NonNull final Follow model) {
                 final String usersUid = getRef(position).getKey();
 
-                userRef.child(usersUid).addValueEventListener(new ValueEventListener() {
+                userRef.child(Objects.requireNonNull(usersUid)).addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         if (dataSnapshot.exists()) {
-                            final String userName = dataSnapshot.child("firstname").getValue().toString() + " " + dataSnapshot.child("lastname").getValue().toString();
-                            final String profileImage = dataSnapshot.child("profileimage").getValue().toString();
+                            final String userName = Objects.requireNonNull(dataSnapshot.child("firstname").getValue()).toString() +
+                                    " " + Objects.requireNonNull(dataSnapshot.child("lastname").getValue()).toString();
+                            final String profileImage = Objects.requireNonNull(dataSnapshot.child("profileimage").getValue()).toString();
                             holder.setFullname(userName);
                             holder.setProfileimage(profileImage);
+
+                            holder.itemView.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    Intent clickPostIntent = new Intent(FollowActivity.this, ProfileActivity.class);
+                                    clickPostIntent.putExtra("userKey", usersUid);
+                                    startActivity(clickPostIntent);
+                                }
+                            });
                         }
                     }
 

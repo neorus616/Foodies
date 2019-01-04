@@ -7,13 +7,13 @@
         android:icon="@drawable/add_post"/>
 
     <item
-        android:id="@+id/nav_home"
-        android:title="Top"
+        android:id="@+id/nav_new"
+        android:title="Fresh"
         android:icon="@drawable/home"/>
 
     <item
-        android:id="@+id/nav_new"
-        android:title="Fresh"
+        android:id="@+id/nav_hot"
+        android:title="Hot"
         android:icon="@drawable/home"/>
 
     <item

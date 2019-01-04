@@ -122,8 +122,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void displayAllRecipes() {
-        Query sortByNew = recipeRef.orderByChild("counter");
-        FirebaseRecyclerOptions<Recipe> options = new FirebaseRecyclerOptions.Builder<Recipe>().setQuery(sortByNew, Recipe.class).build();
+        Query sortBy = recipeRef.orderByChild("counter");
+        if (getIntent().getExtras() != null)
+            if (Objects.requireNonNull(getIntent().getExtras().get("content")).toString().equals("new"))
+                sortBy = recipeRef.orderByChild("counter");
+            else sortBy = recipeRef.orderByChild("likes");
+        FirebaseRecyclerOptions<Recipe> options = new FirebaseRecyclerOptions.Builder<Recipe>().setQuery(sortBy, Recipe.class).build();
         FirebaseRecyclerAdapter<Recipe, RecipeViewHolder> firebaseRecyclerAdapter = new FirebaseRecyclerAdapter<Recipe, RecipeViewHolder>(options) {
             @Override
             protected void onBindViewHolder(@NonNull RecipeViewHolder holder, int position, @NonNull Recipe model) {
@@ -265,7 +269,34 @@ public class MainActivity extends AppCompatActivity {
             case R.id.nav_register:
                 SendUserToRegisterActivity();
                 break;
+            case R.id.nav_new:
+                SendUserToMainActivityNew();
+                break;
+            case R.id.nav_hot:
+                SendUserToMainActivityHot();
+                break;
         }
+    }
+
+    private void SendUserToMainActivityNew() {
+        Intent mainActivity = new Intent(MainActivity.this, MainActivity.class);
+        mainActivity.putExtra("content", "new");
+        startActivity(mainActivity);
+        finish();
+    }
+
+    private void SendUserToProfileSetupActivity() {
+        Intent setupIntent = new Intent(MainActivity.this, ProfileSetupActivity.class);
+        setupIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(setupIntent);
+        finish();
+    }
+
+    private void SendUserToMainActivityHot() {
+        Intent mainActivity = new Intent(MainActivity.this, MainActivity.class);
+        mainActivity.putExtra("content", "hot");
+        startActivity(mainActivity);
+        finish();
     }
 
     private void SendUserToFollowsActivity() {
@@ -310,7 +341,7 @@ public class MainActivity extends AppCompatActivity {
         TextView numOfLikes;
         int countLikes;
         String currentUserUid;
-        DatabaseReference likesRef;
+        DatabaseReference likesRef, recipeRef;
 
         RecipeViewHolder(View itemView) {
             super(itemView);
@@ -321,6 +352,7 @@ public class MainActivity extends AppCompatActivity {
             commentRecipeButton = view.findViewById(R.id.commentButton);
             numOfLikes = view.findViewById(R.id.display_num_likes);
             likesRef = FirebaseDatabase.getInstance().getReference().child("Likes");
+            recipeRef = FirebaseDatabase.getInstance().getReference().child("Recipes");
             if (FirebaseAuth.getInstance().getCurrentUser() != null)
                 currentUserUid = Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
             else {
@@ -336,37 +368,37 @@ public class MainActivity extends AppCompatActivity {
             user_post_image = view.findViewById(R.id.post_profile_image);
         }
 
-        public void setFullname(String fullname) {
+        void setFullname(String fullname) {
             TextView username = itemView.findViewById(R.id.post_username);
             username.setText(fullname);
         }
 
-        public void setTime(String time) {
+        void setTime(String time) {
             TextView recipeTime = itemView.findViewById(R.id.post_time);
             recipeTime.setText(time);
         }
 
-        public void setDate(String date) {
+        void setDate(String date) {
             TextView recipeDate = itemView.findViewById(R.id.post_date);
             recipeDate.setText(date);
         }
 
-        public void setTitle(String title) {
+        void setTitle(String title) {
             TextView titlePost = itemView.findViewById(R.id.post_title);
             titlePost.setText(title);
         }
 
-        public void setProfileImage(String profileimage) {
+        void setProfileImage(String profileimage) {
             CircleImageView image = itemView.findViewById(R.id.post_profile_image);
             Picasso.get().load(profileimage).placeholder(R.drawable.profile).into(image);
         }
 
-        public void setRecipeImage(String recipeimage) {
+        void setRecipeImage(String recipeimage) {
             ImageView recipeImage = itemView.findViewById(R.id.post_image);
             Picasso.get().load(recipeimage).placeholder(R.drawable.add_post_high).into(recipeImage);
         }
 
-        public void setLikeButtonStatus(final String postKey) {
+        void setLikeButtonStatus(final String postKey) {
             likesRef.addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -374,10 +406,12 @@ public class MainActivity extends AppCompatActivity {
                         countLikes = (int) dataSnapshot.child(postKey).getChildrenCount();
                         likeRecipeButton.setImageResource(R.drawable.like);
                         numOfLikes.setText(String.format("%s Likes", String.valueOf(countLikes)));
+                        recipeRef.child(postKey).child("likes").setValue(countLikes);
                     } else {
                         countLikes = (int) dataSnapshot.child(postKey).getChildrenCount();
                         likeRecipeButton.setImageResource(R.drawable.dislike);
                         numOfLikes.setText(String.format("%s Likes", String.valueOf(countLikes)));
+                        recipeRef.child(postKey).child("likes").setValue(countLikes);
                     }
                 }
 
@@ -387,12 +421,5 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
         }
-    }
-
-    private void SendUserToProfileSetupActivity() {
-        Intent setupIntent = new Intent(MainActivity.this, ProfileSetupActivity.class);
-        setupIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(setupIntent);
-        finish();
     }
 }

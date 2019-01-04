@@ -47,7 +47,7 @@ public class FullRecipeActivity extends AppCompatActivity {
         fullrecipedb = FirebaseDatabase.getInstance().getReference().child("Recipes").child(postKey);
         firebaseAuth = FirebaseAuth.getInstance();
         if (FirebaseAuth.getInstance().getCurrentUser() != null)
-            currentUserUid = firebaseAuth.getCurrentUser().getUid();
+            currentUserUid = Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid();
         else
             currentUserUid = "";
 
@@ -71,9 +71,11 @@ public class FullRecipeActivity extends AppCompatActivity {
                     listElementsArrayList = dataSnapshot.child("ingredients").getValue(t);
 
                     StringBuilder ingredients = new StringBuilder();
-                    for (int i = 0; i < listElementsArrayList.size() - 1; i++)
-                        ingredients.append(listElementsArrayList.get(i)).append(", ");
-                    ingredients.append(listElementsArrayList.get(listElementsArrayList.size() - 1));
+                    if (listElementsArrayList != null) {
+                        for (int i = 0; i < listElementsArrayList.size() - 1; i++)
+                            ingredients.append(listElementsArrayList.get(i)).append(", ");
+                        ingredients.append(listElementsArrayList.get(listElementsArrayList.size() - 1));
+                    }
                     listIngredients.setText(ingredients);
                     fullRecipe.setText(recipe);
                     Picasso.get().load(image).into(fullRecipeImage);
@@ -128,7 +130,7 @@ public class FullRecipeActivity extends AppCompatActivity {
         });
         Dialog dialog = builder.create();
         dialog.show();
-        dialog.getWindow().setBackgroundDrawableResource(android.R.color.holo_blue_dark);
+        Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawableResource(android.R.color.holo_blue_dark);
     }
 
     private void DeletePost() {
