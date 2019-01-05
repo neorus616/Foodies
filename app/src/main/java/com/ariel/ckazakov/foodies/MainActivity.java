@@ -123,10 +123,11 @@ public class MainActivity extends AppCompatActivity {
 
     private void displayAllRecipes() {
         Query sortBy = recipeRef.orderByChild("counter");
-        if (getIntent().getExtras() != null)
+        if (getIntent() != null && getIntent().getExtras() != null && getIntent().getExtras().get("content") != null) {
             if (Objects.requireNonNull(getIntent().getExtras().get("content")).toString().equals("new"))
                 sortBy = recipeRef.orderByChild("counter");
             else sortBy = recipeRef.orderByChild("likes");
+        }
         FirebaseRecyclerOptions<Recipe> options = new FirebaseRecyclerOptions.Builder<Recipe>().setQuery(sortBy, Recipe.class).build();
         FirebaseRecyclerAdapter<Recipe, RecipeViewHolder> firebaseRecyclerAdapter = new FirebaseRecyclerAdapter<Recipe, RecipeViewHolder>(options) {
             @Override
