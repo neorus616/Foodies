@@ -90,7 +90,7 @@ public class LoginActivity extends AppCompatActivity {
                                 // Get new Instance ID token
                                 String token = Objects.requireNonNull(task.getResult()).getToken();
                                 DatabaseReference fcmRef = FirebaseDatabase.getInstance().getReference().child("FCM");
-                                fcmRef.child(token).setValue(token);
+                                fcmRef.child(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid()).setValue(token);
                             }
                         });
                         Toast.makeText(LoginActivity.this, "Login successful!", Toast.LENGTH_SHORT).show();

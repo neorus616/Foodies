@@ -9,7 +9,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -19,7 +18,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.messaging.FirebaseMessaging;
 import com.squareup.picasso.Picasso;
 
 import java.util.Objects;
@@ -232,17 +230,6 @@ public class ProfileActivity extends AppCompatActivity {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
                             unfollowButton.setVisibility(View.VISIBLE);
-                            FirebaseMessaging.getInstance().subscribeToTopic("Recipes")
-                                    .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                        @Override
-                                        public void onComplete(@NonNull Task<Void> task) {
-                                            String msg = "succeed to subscribe";
-                                            if (!task.isSuccessful()) {
-                                                msg = "failed to subscribe";
-                                            }
-                                            Toast.makeText(ProfileActivity.this, msg, Toast.LENGTH_SHORT).show();
-                                        }
-                                    });
                         }
                     });
                 }
