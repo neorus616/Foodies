@@ -98,7 +98,7 @@ public class RegisterActivity extends AppCompatActivity {
                                 // Get new Instance ID token
                                 String token = Objects.requireNonNull(task.getResult()).getToken();
                                 DatabaseReference fcmRef = FirebaseDatabase.getInstance().getReference().child("FCM");
-                                fcmRef.child(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid()).setValue(token);
+                                fcmRef.child(token).setValue(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid());
                             }
                         });
                         SendUserToCreateProfile();
