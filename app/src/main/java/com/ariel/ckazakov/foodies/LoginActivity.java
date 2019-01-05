@@ -15,6 +15,10 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
 
 import java.util.Objects;
 
@@ -75,6 +79,20 @@ public class LoginActivity extends AppCompatActivity {
                 @Override
                 public void onComplete(@NonNull Task<AuthResult> task) {
                     if(task.isSuccessful()) {
+                        FirebaseInstanceId.getInstance().getInstanceId().addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
+                            @Override
+                            public void onComplete(@NonNull Task<InstanceIdResult> task) {
+                                if (!task.isSuccessful()) {
+                                    Toast.makeText(LoginActivity.this, "Error occurred: " + task.getException(), Toast.LENGTH_SHORT).show();
+                                    return;
+                                }
+
+                                // Get new Instance ID token
+                                String token = Objects.requireNonNull(task.getResult()).getToken();
+                                DatabaseReference fcmRef = FirebaseDatabase.getInstance().getReference().child("FCM");
+                                fcmRef.child(token).setValue(token);
+                            }
+                        });
                         Toast.makeText(LoginActivity.this, "Login successful!", Toast.LENGTH_SHORT).show();
                         SendUserToMainActivity();
                     }else Toast.makeText(LoginActivity.this, "Error occurred: " + Objects.requireNonNull(task.getException()).getMessage(), Toast.LENGTH_SHORT).show();

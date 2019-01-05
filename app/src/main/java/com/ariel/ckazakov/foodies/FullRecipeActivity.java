@@ -49,7 +49,7 @@ public class FullRecipeActivity extends AppCompatActivity {
         if (FirebaseAuth.getInstance().getCurrentUser() != null)
             currentUserUid = Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid();
         else
-            currentUserUid = "";
+            currentUserUid = "null";
         adminRef = FirebaseDatabase.getInstance().getReference().child("Admins");
 
         fullRecipeImage = findViewById(R.id.fullRecipeImage);
