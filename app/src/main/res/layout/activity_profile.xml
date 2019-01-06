@@ -57,7 +57,7 @@
                 android:layout_below="@id/profile_fullname_public"
                 android:layout_centerHorizontal="true"
                 android:layout_marginTop="45dp"
-                android:background="@color/colorAccent"
+                android:background="@color/primaryRed"
                 android:text="Unfollow"
                 android:textAllCaps="false"
                 android:textColor="@android:color/background_light"

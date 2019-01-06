@@ -119,7 +119,9 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
      */
     private void sendRegistrationToServer(String token) {
         DatabaseReference fcmRef = FirebaseDatabase.getInstance().getReference().child("FCM");
-        fcmRef.child(token).setValue(Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid());
+        fcmRef.child(token).setValue(token);
+        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference().child("Users");
+        userRef.child(Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid()).child("token").setValue(token);
     }
 
     /**

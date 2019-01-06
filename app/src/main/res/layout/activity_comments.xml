@@ -8,22 +8,24 @@
 
     <TextView
         android:id="@+id/comments_title"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
         android:textColor="@android:color/black"
         android:textSize="24sp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="4dp"
         android:textStyle="bold"
-        tools:text="Comments:" />
+        android:text="Comments:" />
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/comment_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@+id/comments_title"
-        android:layout_alignParentStart="true"
-        android:layout_margin="5dp" />
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="1dp"
+        android:layout_marginEnd="5dp"
+        android:layout_marginBottom="55dp" />
 
     <EditText
         android:id="@+id/comment_input"
@@ -45,6 +47,4 @@
         android:layout_alignParentEnd="true"
         android:padding="15dp"
         android:src="@drawable/post_comment" />
-
-
 </RelativeLayout>

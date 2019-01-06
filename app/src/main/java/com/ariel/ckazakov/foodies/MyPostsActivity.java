@@ -52,7 +52,7 @@ public class MyPostsActivity extends AppCompatActivity {
         recipeRef = FirebaseDatabase.getInstance().getReference().child("Recipes");
         userRef = FirebaseDatabase.getInstance().getReference().child("Users");
         likesRef = FirebaseDatabase.getInstance().getReference().child("Likes");
-        currentUid = firebaseAuth.getCurrentUser().getUid();
+        currentUid = Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid();
         if (getIntent().getExtras() != null) {
             userKey = Objects.requireNonNull(getIntent().getExtras().get("userKey")).toString();
             myPostQuery = recipeRef.orderByChild("uid").startAt(userKey).endAt(userKey + "\uf8ff");
@@ -63,7 +63,11 @@ public class MyPostsActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(Boolean.TRUE);
         getSupportActionBar().setDisplayShowHomeEnabled(Boolean.TRUE);
-        getSupportActionBar().setTitle("My Posts");
+        if (userKey == null)
+            getSupportActionBar().setTitle("My Posts");
+        else
+            getSupportActionBar().setTitle("Posts");
+
 
         myPostList = findViewById(R.id.all_my_posts_list);
         myPostList.setHasFixedSize(Boolean.TRUE);

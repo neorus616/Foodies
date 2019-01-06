@@ -133,6 +133,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             protected void onBindViewHolder(@NonNull RecipeViewHolder holder, int position, @NonNull Recipe model) {
                 final String postKey = getRef(position).getKey();
+                final String userKey = model.getUid();
 
                 holder.setFullname(model.getFullName());
                 holder.setTime(String.format(" %s", model.getTime()));
@@ -146,6 +147,15 @@ public class MainActivity extends AppCompatActivity {
                     holder.likeRecipeButton.setVisibility(View.INVISIBLE);
                     holder.commentRecipeButton.setVisibility(View.INVISIBLE);
                 }
+
+                holder.user_post_image.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent clickPostIntent = new Intent(MainActivity.this, ProfileActivity.class);
+                        clickPostIntent.putExtra("userKey", userKey);
+                        startActivity(clickPostIntent);
+                    }
+                });
 
                 holder.itemView.setOnClickListener(new View.OnClickListener() {
                     @Override

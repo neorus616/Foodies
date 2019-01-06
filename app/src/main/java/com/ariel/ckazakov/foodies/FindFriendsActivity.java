@@ -27,6 +27,7 @@ import com.squareup.picasso.Picasso;
 import java.util.Objects;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+import me.mvdw.recyclerviewmergeadapter.adapter.RecyclerViewMergeAdapter;
 
 public class FindFriendsActivity extends AppCompatActivity {
 
@@ -67,35 +68,76 @@ public class FindFriendsActivity extends AppCompatActivity {
 
     private void SearchFriends(String searchIn) {
         Toast.makeText(this, "Searching..", Toast.LENGTH_SHORT).show();
-        Query searchFriendsQuery = userRef.orderByChild("firstname").startAt(searchIn).endAt(searchIn + "\uf8ff");
-        FirebaseRecyclerOptions<Profiles> options = new FirebaseRecyclerOptions.Builder<Profiles>().setQuery(searchFriendsQuery, Profiles.class).build();
-        FirebaseRecyclerAdapter<Profiles, FindFriendsActivity.FindFriendsViewHolder> firebaseRecyclerAdapter = new FirebaseRecyclerAdapter<Profiles, FindFriendsActivity.FindFriendsViewHolder>(options) {
-            @Override
-            protected void onBindViewHolder(@NonNull FindFriendsActivity.FindFriendsViewHolder holder, int position, @NonNull Profiles model) {
-                final String userKey = getRef(position).getKey();
+        searchIn = searchIn.toLowerCase();
+        String[] searches = searchIn.split(" ");
+        RecyclerViewMergeAdapter mergeAdapter = new RecyclerViewMergeAdapter();
+        for (String search : searches) {
+            Query searchFriendsQuery = userRef.orderByChild("firstname").startAt(search).endAt(search + "\uf8ff");
+            FirebaseRecyclerOptions<Profiles> options = new FirebaseRecyclerOptions.Builder<Profiles>().setQuery(searchFriendsQuery, Profiles.class).build();
+            FirebaseRecyclerAdapter<Profiles, FindFriendsActivity.FindFriendsViewHolder> firebaseRecyclerAdapter =
+                    new FirebaseRecyclerAdapter<Profiles, FindFriendsActivity.FindFriendsViewHolder>(options) {
+                        @Override
+                        protected void onBindViewHolder(@NonNull FindFriendsActivity.FindFriendsViewHolder holder, int position, @NonNull Profiles model) {
+                            final String userKey = getRef(position).getKey();
 
-                holder.setFullname(String.format("%s %s", model.getFirstname(), model.getLastname()));
-                holder.setProfileimage(model.getProfileimage());
+                            holder.setFullname(String.format("%s %s", model.getFirstname(), model.getLastname()));
+                            holder.setProfileimage(model.getProfileimage());
 
-                holder.itemView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Intent clickPostIntent = new Intent(FindFriendsActivity.this, ProfileActivity.class);
-                        clickPostIntent.putExtra("userKey", userKey);
-                        startActivity(clickPostIntent);
-                    }
-                });
+                            holder.itemView.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    Intent clickPostIntent = new Intent(FindFriendsActivity.this, ProfileActivity.class);
+                                    clickPostIntent.putExtra("userKey", userKey);
+                                    startActivity(clickPostIntent);
+                                }
+                            });
+                        }
+
+                        @NonNull
+                        @Override
+                        public FindFriendsActivity.FindFriendsViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+                            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.all_users_layout, parent, false);
+                            return new FindFriendsActivity.FindFriendsViewHolder(view);
+                        }
+                    };
+            mergeAdapter.addAdapter(firebaseRecyclerAdapter);
+            firebaseRecyclerAdapter.startListening();
+        }
+        if (!searchIn.isEmpty())
+            for (String search : searches) {
+                Query searchFriendsQuery = userRef.orderByChild("lastname").startAt(search).endAt(search + "\uf8ff");
+                FirebaseRecyclerOptions<Profiles> options = new FirebaseRecyclerOptions.Builder<Profiles>().setQuery(searchFriendsQuery, Profiles.class).build();
+                FirebaseRecyclerAdapter<Profiles, FindFriendsActivity.FindFriendsViewHolder> firebaseRecyclerAdapter =
+                        new FirebaseRecyclerAdapter<Profiles, FindFriendsActivity.FindFriendsViewHolder>(options) {
+                            @Override
+                            protected void onBindViewHolder(@NonNull FindFriendsActivity.FindFriendsViewHolder holder, int position, @NonNull Profiles model) {
+                                final String userKey = getRef(position).getKey();
+
+                                holder.setFullname(String.format("%s %s", model.getFirstname(), model.getLastname()));
+                                holder.setProfileimage(model.getProfileimage());
+
+                                holder.itemView.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        Intent clickPostIntent = new Intent(FindFriendsActivity.this, ProfileActivity.class);
+                                        clickPostIntent.putExtra("userKey", userKey);
+                                        startActivity(clickPostIntent);
+                                    }
+                                });
+                            }
+
+                            @NonNull
+                            @Override
+                            public FindFriendsActivity.FindFriendsViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+                                View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.all_users_layout, parent, false);
+                                return new FindFriendsActivity.FindFriendsViewHolder(view);
+                            }
+                        };
+                mergeAdapter.addAdapter(firebaseRecyclerAdapter);
+                firebaseRecyclerAdapter.startListening();
             }
+        searchResult.setAdapter(mergeAdapter);
 
-            @NonNull
-            @Override
-            public FindFriendsActivity.FindFriendsViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-                View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.all_users_layout, parent, false);
-                return new FindFriendsActivity.FindFriendsViewHolder(view);
-            }
-        };
-        searchResult.setAdapter(firebaseRecyclerAdapter);
-        firebaseRecyclerAdapter.startListening();
     }
 
     public static class FindFriendsViewHolder extends RecyclerView.ViewHolder {

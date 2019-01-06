@@ -120,8 +120,10 @@ public class CommentsActivity extends AppCompatActivity {
             final String saveCurrentDate = currentDate.format(calendarDate.getTime());
             SimpleDateFormat currentTime = new SimpleDateFormat("HH:mm", Locale.US);
             final String saveCurrentTime = currentTime.format(calendarDate.getTime());
+            SimpleDateFormat currentTimeSec = new SimpleDateFormat("HH:mm:ss", Locale.US);
+            final String saveCurrentTimeSec = currentTimeSec.format(calendarDate.getTime());
 
-            final String rndKey = saveCurrentDate + saveCurrentTime + currentUserUID;
+            final String rndKey = saveCurrentDate + saveCurrentTimeSec + currentUserUID;
 
             HashMap<String, Object> comments = new HashMap<>();
             comments.put("uid", currentUserUID);
