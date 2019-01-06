@@ -53,7 +53,7 @@ public class MyPostsActivity extends AppCompatActivity {
         userRef = FirebaseDatabase.getInstance().getReference().child("Users");
         likesRef = FirebaseDatabase.getInstance().getReference().child("Likes");
         currentUid = Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid();
-        if (getIntent().getExtras() != null) {
+        if (getIntent().getExtras() != null && getIntent().getExtras().get("userKey") != null) {
             userKey = Objects.requireNonNull(getIntent().getExtras().get("userKey")).toString();
             myPostQuery = recipeRef.orderByChild("uid").startAt(userKey).endAt(userKey + "\uf8ff");
         } else

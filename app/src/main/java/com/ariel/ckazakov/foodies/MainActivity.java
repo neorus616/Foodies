@@ -102,20 +102,20 @@ public class MainActivity extends AppCompatActivity {
         actionBarDrawerToggle = new ActionBarDrawerToggle(MainActivity.this, drawerLayout, R.string.drawer_open, R.string.drawer_close);
         drawerLayout.addDrawerListener(actionBarDrawerToggle);
         actionBarDrawerToggle.syncState();
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(Boolean.TRUE);
 
         recyclerView = findViewById(R.id.all_users_post_list);
         recyclerView.setHasFixedSize(Boolean.TRUE);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
-        linearLayoutManager.setReverseLayout(true);
-        linearLayoutManager.setStackFromEnd(true);
+        linearLayoutManager.setReverseLayout(Boolean.TRUE);
+        linearLayoutManager.setStackFromEnd(Boolean.TRUE);
         recyclerView.setLayoutManager(linearLayoutManager);
 
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
                 UserMenuSelector(menuItem);
-                return false;
+                return Boolean.FALSE;
             }
         });
         displayAllRecipes();
@@ -202,7 +202,7 @@ public class MainActivity extends AppCompatActivity {
             @NonNull
             @Override
             public RecipeViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-                View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.all_recipes_layout, parent, false);
+                View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.all_recipes_layout, parent, Boolean.FALSE);
                 return new RecipeViewHolder(view);
             }
         };
@@ -216,9 +216,13 @@ public class MainActivity extends AppCompatActivity {
         userRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (!dataSnapshot.hasChild(currentUserID)) {
+                if (dataSnapshot.child(currentUserID).child("firstname").exists()) {
+                    String firstname = Objects.requireNonNull(dataSnapshot.child(currentUserID).child("firstname").getValue()).toString();
+                    if (firstname.isEmpty()) {
+                        SendUserToProfileSetupActivity();
+                    }
+                } else
                     SendUserToProfileSetupActivity();
-                }
             }
 
             @Override
@@ -241,7 +245,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (actionBarDrawerToggle.onOptionsItemSelected(item))
-            return true;
+            return Boolean.TRUE;
         return super.onOptionsItemSelected(item);
     }
 

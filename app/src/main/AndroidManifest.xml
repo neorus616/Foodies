@@ -40,7 +40,9 @@
         <activity
             android:name=".MyPostsActivity"
             android:parentActivityName=".MainActivity" />
-        <activity android:name=".FindRecipesActivity"></activity>
+        <activity
+            android:name=".FindRecipesActivity"
+            android:parentActivityName=".MainActivity" />
 
         <service android:name=".MyFirebaseMessagingService">
             <intent-filter>

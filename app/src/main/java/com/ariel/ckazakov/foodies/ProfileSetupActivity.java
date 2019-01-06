@@ -64,8 +64,12 @@ public class ProfileSetupActivity extends AppCompatActivity {
         profileImage = findViewById(R.id.profile_image);
         loadingBar = new ProgressDialog(this);
 
-        if (getIntent().getExtras() != null)
+        if (getIntent() != null && getIntent().getExtras() != null && getIntent().getExtras().get("updatedProfileImage") != null)
             updatedProfileImage = (Boolean) Objects.requireNonNull(getIntent().getExtras()).get("updatedProfileImage");
+        if (getIntent() != null && getIntent().getExtras() != null && getIntent().getExtras().get("firstName") != null)
+            firstName.setText(Objects.requireNonNull(getIntent().getExtras().get("firstName")).toString());
+        if (getIntent() != null && getIntent().getExtras() != null && getIntent().getExtras().get("lastName") != null)
+            lastName.setText(Objects.requireNonNull(getIntent().getExtras().get("lastName")).toString());
 
         save.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -148,6 +152,8 @@ public class ProfileSetupActivity extends AppCompatActivity {
                                                         Intent selfIntent = new Intent(ProfileSetupActivity.this, ProfileSetupActivity.class);
                                                         updatedProfileImage = Boolean.TRUE;
                                                         selfIntent.putExtra("updatedProfileImage", updatedProfileImage);
+                                                        selfIntent.putExtra("firstName", firstName.getText().toString());
+                                                        selfIntent.putExtra("lastName", lastName.getText().toString());
                                                         startActivity(selfIntent);
                                                         Toast.makeText(ProfileSetupActivity.this, "Profile image stored in Firebase Storage successfully ...", Toast.LENGTH_SHORT).show();
                                                     } else {

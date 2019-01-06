@@ -50,7 +50,7 @@ public class ProfileActivity extends AppCompatActivity {
         followRef = FirebaseDatabase.getInstance().getReference().child("Follows");
         recipeRef = FirebaseDatabase.getInstance().getReference().child("Recipes");
 
-        if (getIntent().getExtras() != null)
+        if (getIntent().getExtras() != null && getIntent().getExtras().get("userKey") != null)
             userKey = Objects.requireNonNull(getIntent().getExtras().get("userKey")).toString();
         firebaseAuth = FirebaseAuth.getInstance();
         currentUserUid = Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid();
