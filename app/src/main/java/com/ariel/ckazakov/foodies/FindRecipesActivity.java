@@ -28,21 +28,22 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
-import java.util.ArrayList;
 import java.util.Objects;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import me.mvdw.recyclerviewmergeadapter.adapter.RecyclerViewMergeAdapter;
 
+/**
+ * Activity for searching recipes.
+ */
 public class FindRecipesActivity extends AppCompatActivity {
 
-    ArrayList<String> recipesList;
     private Toolbar toolbar;
     private ImageButton searchButton;
     private EditText searchInput;
     private RecyclerView searchResult;
     private FirebaseAuth firebaseAuth;
-    private DatabaseReference recipeRef, likesRef, recipeRef2;
+    private DatabaseReference recipeRef, likesRef;
     private String currentUserID;
     private Boolean likeChecker = Boolean.FALSE;
 
@@ -53,7 +54,6 @@ public class FindRecipesActivity extends AppCompatActivity {
 
         firebaseAuth = FirebaseAuth.getInstance();
         recipeRef = FirebaseDatabase.getInstance().getReference().child("Recipes");
-        recipeRef2 = FirebaseDatabase.getInstance().getReference().child("Recipes");
         likesRef = FirebaseDatabase.getInstance().getReference().child("Likes");
         currentUserID = Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid();
 
@@ -65,23 +65,15 @@ public class FindRecipesActivity extends AppCompatActivity {
         searchButton = findViewById(R.id.search_recipes_button);
         searchInput = findViewById(R.id.search_box_input_recipes);
         searchResult = findViewById(R.id.search_result_recipes);
+        /*
+            configurations for the recycle view
+         */
         searchResult.setHasFixedSize(Boolean.TRUE);
         searchResult.setLayoutManager(new LinearLayoutManager(this));
 
-        recipesList = new ArrayList<String>();
-        recipeRef2.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                for (DataSnapshot dsp : dataSnapshot.getChildren())
-                    recipesList.add(String.valueOf(dsp.getKey()));
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-
+        /*
+            when ever an user click on the 'Search' button, it sends his input to 'SearchRecipes' method
+         */
         searchButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -91,11 +83,20 @@ public class FindRecipesActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * split user input, and sorting from DB by title with input.
+     * show results via recycle view
+     *
+     * @param searchIn - user input
+     */
     private void SearchRecipes(String searchIn) {
         Toast.makeText(this, "Searching..", Toast.LENGTH_SHORT).show();
         String[] searches = searchIn.split(" ");
         RecyclerViewMergeAdapter mergeAdapter = new RecyclerViewMergeAdapter();
         for (String search : searches) {
+            /*
+                Firebase recycle view configurations for the recipes
+             */
             Query searchRecipesQuery = recipeRef.orderByChild("title").startAt(search).endAt(search + "\uf8ff");
             FirebaseRecyclerOptions<Recipe> options = new FirebaseRecyclerOptions.Builder<Recipe>()
                     .setQuery(searchRecipesQuery, Recipe.class).build();
@@ -113,6 +114,9 @@ public class FindRecipesActivity extends AppCompatActivity {
                             holder.setProfileImage(model.getProfileImage());
                             holder.setLikeButtonStatus(postKey);
 
+                            /*
+                                if user click on recipe, it redirect him to the recipe page
+                             */
                             holder.itemView.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
@@ -121,6 +125,11 @@ public class FindRecipesActivity extends AppCompatActivity {
                                     startActivity(clickPostIntent);
                                 }
                             });
+
+                            /*
+                                if user click on like\dislike button, it remove the like if he likes it already,
+                                and add the like otherwise
+                             */
                             holder.likeRecipeButton.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
@@ -144,6 +153,10 @@ public class FindRecipesActivity extends AppCompatActivity {
                                     });
                                 }
                             });
+
+                            /*
+                                if user click on comment image, it redirect him to the recipe comments page
+                             */
                             holder.commentRecipeButton.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
@@ -167,6 +180,9 @@ public class FindRecipesActivity extends AppCompatActivity {
         searchResult.setAdapter(mergeAdapter);
     }
 
+    /**
+     * static class for Firebase recycler
+     */
     public static class RecipeViewHolder extends RecyclerView.ViewHolder {
         View view;
 
@@ -190,6 +206,9 @@ public class FindRecipesActivity extends AppCompatActivity {
             numOfLikes = view.findViewById(R.id.display_num_likes);
             likesRef = FirebaseDatabase.getInstance().getReference().child("Likes");
             recipeRef = FirebaseDatabase.getInstance().getReference().child("Recipes");
+            /*
+                if user connected, show the like counter, hide otherwise
+             */
             if (FirebaseAuth.getInstance().getCurrentUser() != null)
                 currentUserUid = Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
             else {
@@ -235,6 +254,12 @@ public class FindRecipesActivity extends AppCompatActivity {
             Picasso.get().load(recipeimage).placeholder(R.drawable.add_post_high).into(recipeImage);
         }
 
+        /**
+         * change the icon whenever the user likes the post or not, and show the amount of likes
+         * the recipe has.
+         *
+         * @param postKey - uid of the recipe
+         */
         void setLikeButtonStatus(final String postKey) {
             likesRef.addValueEventListener(new ValueEventListener() {
                 @Override

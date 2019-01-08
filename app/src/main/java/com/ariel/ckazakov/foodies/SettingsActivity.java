@@ -34,6 +34,9 @@ import java.util.Objects;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
+/**
+ * Activity for user to change his profile.
+ */
 public class SettingsActivity extends AppCompatActivity {
 
     private Toolbar toolbar;
@@ -70,6 +73,9 @@ public class SettingsActivity extends AppCompatActivity {
         updateAccountSettings = findViewById(R.id.update_account_settings);
         userProfileImage = findViewById(R.id.settings_profile_image);
 
+        /*
+            Write the current user first/last name and draw his profile image
+         */
         userRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -90,6 +96,9 @@ public class SettingsActivity extends AppCompatActivity {
             }
         });
 
+        /*
+            When user click on his profile image, it redirect him to gallery to choose another one
+         */
         userProfileImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -110,6 +119,9 @@ public class SettingsActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * After user choose a picture, crop it and upload to storage.
+     */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -171,6 +183,10 @@ public class SettingsActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Validate if user typed first, last name and uploaded a picture, if he does, send him to
+     * updateAccountSettings method.
+     */
     private void validateProfile() {
         String newFirstname = firstname.getText().toString();
         String newLastname = lastname.getText().toString();
@@ -181,6 +197,12 @@ public class SettingsActivity extends AppCompatActivity {
         else updateAccountSettings(newFirstname, newLastname);
     }
 
+    /**
+     * Update user first/last name and profile image in DB.
+     *
+     * @param newFirstname - new user first name
+     * @param newLastname  - new user last name
+     */
     private void updateAccountSettings(String newFirstname, String newLastname) {
         loadingBar.setTitle("Saving Information");
         loadingBar.setMessage("Please wait, while we are updating your account...");
@@ -203,6 +225,9 @@ public class SettingsActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Send the user to main activity(and finish this one).
+     */
     private void SendUserToMainActivity() {
         Intent mainIntent = new Intent(SettingsActivity.this, MainActivity.class);
         mainIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);

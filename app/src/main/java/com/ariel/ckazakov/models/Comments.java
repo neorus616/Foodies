@@ -1,13 +1,27 @@
 package com.ariel.ckazakov.models;
 
+/**
+ * This is a model class for comments of a recipe
+ */
 public class Comments {
 
     public String comment, date, time, username;
 
+    /**
+     * default constructor
+     */
     public Comments() {
 
     }
 
+    /**
+     * constructor
+     *
+     * @param comment  - content of the comment
+     * @param time     - time (HH:mm)
+     * @param date     - date (dd-mm-YYYY)
+     * @param username - full name of the publisher
+     */
     public Comments(String comment, String date, String time, String username) {
         this.comment = comment;
         this.date = date;

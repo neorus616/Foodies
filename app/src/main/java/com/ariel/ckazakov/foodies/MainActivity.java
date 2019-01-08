@@ -35,6 +35,9 @@ import java.util.Objects;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
+/**
+ * Main activity(first page the user see's when open the app).
+ */
 public class MainActivity extends AppCompatActivity {
 
     private NavigationView navigationView;
@@ -60,6 +63,9 @@ public class MainActivity extends AppCompatActivity {
         recipeRef = FirebaseDatabase.getInstance().getReference().child("Recipes");
         userRef = FirebaseDatabase.getInstance().getReference().child("Users");
         likesRef = FirebaseDatabase.getInstance().getReference().child("Likes");
+        /*
+            If user is not logged in, he limited to some functions
+         */
         if (firebaseAuth.getCurrentUser() != null) {
             setContentView(R.layout.activity_main);
             currentUserID = firebaseAuth.getCurrentUser().getUid();
@@ -72,10 +78,16 @@ public class MainActivity extends AppCompatActivity {
         Objects.requireNonNull(getSupportActionBar()).setTitle("Home");
 
         drawerLayout = findViewById(R.id.drawable_layout);
+        /*
+            Navigation bar
+         */
         navigationView = findViewById(R.id.navigation_view);
         View navView = navigationView.inflateHeaderView(R.layout.navigation_header);
         navProfileImage = navView.findViewById(R.id.profile_image);
         navProfileUser = navView.findViewById(R.id.username);
+        /*
+            Writes user first/last name and draw profile image to navigation bar
+         */
         userRef.child(currentUserID).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -104,6 +116,9 @@ public class MainActivity extends AppCompatActivity {
         actionBarDrawerToggle.syncState();
         getSupportActionBar().setDisplayHomeAsUpEnabled(Boolean.TRUE);
 
+        /*
+            configurations for the recycle view
+         */
         recyclerView = findViewById(R.id.all_users_post_list);
         recyclerView.setHasFixedSize(Boolean.TRUE);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
@@ -121,6 +136,10 @@ public class MainActivity extends AppCompatActivity {
         displayAllRecipes();
     }
 
+    /**
+     * Show all recipes via recycle view.
+     * Ordered by Likes or Dates(counter).
+     */
     private void displayAllRecipes() {
         Query sortBy = recipeRef.orderByChild("counter");
         if (getIntent() != null && getIntent().getExtras() != null && getIntent().getExtras().get("content") != null) {
@@ -128,6 +147,9 @@ public class MainActivity extends AppCompatActivity {
                 sortBy = recipeRef.orderByChild("counter");
             else sortBy = recipeRef.orderByChild("likes");
         }
+        /*
+            Firebase recycle view configurations for the recipes
+         */
         FirebaseRecyclerOptions<Recipe> options = new FirebaseRecyclerOptions.Builder<Recipe>().setQuery(sortBy, Recipe.class).build();
         FirebaseRecyclerAdapter<Recipe, RecipeViewHolder> firebaseRecyclerAdapter = new FirebaseRecyclerAdapter<Recipe, RecipeViewHolder>(options) {
             @Override
@@ -141,6 +163,9 @@ public class MainActivity extends AppCompatActivity {
                 holder.setTitle(model.getTitle());
                 holder.setRecipeImage(model.getRecipeImage());
                 holder.setProfileImage(model.getProfileImage());
+                /*
+                    If user is not logged in, he can't see the like and comments button
+                 */
                 if (!currentUserID.isEmpty())
                     holder.setLikeButtonStatus(postKey);
                 else {
@@ -148,6 +173,9 @@ public class MainActivity extends AppCompatActivity {
                     holder.commentRecipeButton.setVisibility(View.INVISIBLE);
                 }
 
+                /*
+                    If user click on profile image of the recipe, he redirected to the publisher profile page
+                 */
                 holder.user_post_image.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -157,6 +185,9 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
 
+                /*
+                                if user click on recipe, it redirect him to the recipe page
+                             */
                 holder.itemView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -165,6 +196,11 @@ public class MainActivity extends AppCompatActivity {
                         startActivity(clickPostIntent);
                     }
                 });
+
+                /*
+                    if user click on like\dislike button, it remove the like if he likes it already,
+                    and add the like otherwise
+                 */
                 holder.likeRecipeButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -189,6 +225,10 @@ public class MainActivity extends AppCompatActivity {
                         });
                     }
                 });
+
+                /*
+                    if user click on comment image, it redirect him to the recipe comments page
+                 */
                 holder.commentRecipeButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -210,6 +250,9 @@ public class MainActivity extends AppCompatActivity {
         firebaseRecyclerAdapter.startListening();
     }
 
+    /*
+        Check if user has set first/last name and profile image, if he doesn't, he redirected to do so
+     */
     private void CheckUserExistence() {
         final String currentUserID = Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid();
 
@@ -249,14 +292,11 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-
-    private void SendUserToLoginActivity() {
-        Intent loginIntent = new Intent(MainActivity.this, LoginActivity.class);
-        loginIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(loginIntent);
-        finish();
-    }
-
+    /**
+     * Navigation bar
+     *
+     * @param menuItem - user choose
+     */
     private void UserMenuSelector(MenuItem menuItem) {
         switch (menuItem.getItemId()) {
             case R.id.nav_logout:
@@ -264,7 +304,7 @@ public class MainActivity extends AppCompatActivity {
                 SendUserToLoginActivity();
                 break;
             case R.id.nav_post:
-                SendUserToPostActivity();
+                SendUserToRecipeActivity();
                 break;
             case R.id.nav_settings:
                 SendUserToSettingsActivity();
@@ -296,11 +336,27 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Send the user to find recipes activity.
+     */
     private void SendUserToFindRecipesActivity() {
         Intent findRecipesActivity = new Intent(MainActivity.this, FindRecipesActivity.class);
         startActivity(findRecipesActivity);
     }
 
+    /**
+     * Send the user to login activity(and finish this one).
+     */
+    private void SendUserToLoginActivity() {
+        Intent loginIntent = new Intent(MainActivity.this, LoginActivity.class);
+        loginIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(loginIntent);
+        finish();
+    }
+
+    /**
+     * Send the user to main activity with 'new' recipes activity(and finish this one).
+     */
     private void SendUserToMainActivityNew() {
         Intent mainActivity = new Intent(MainActivity.this, MainActivity.class);
         mainActivity.putExtra("content", "new");
@@ -308,6 +364,9 @@ public class MainActivity extends AppCompatActivity {
         finish();
     }
 
+    /**
+     * Send the user to main activity with 'hot' recipes activity(and finish this one).
+     */
     private void SendUserToMainActivityHot() {
         Intent mainActivity = new Intent(MainActivity.this, MainActivity.class);
         mainActivity.putExtra("content", "hot");
@@ -315,6 +374,9 @@ public class MainActivity extends AppCompatActivity {
         finish();
     }
 
+    /**
+     * Send the user to profile setup activity(and finish this one).
+     */
     private void SendUserToProfileSetupActivity() {
         Intent profileSetupIntent = new Intent(MainActivity.this, ProfileSetupActivity.class);
         profileSetupIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -322,37 +384,58 @@ public class MainActivity extends AppCompatActivity {
         finish();
     }
 
+    /**
+     * Send the user to follow activity.
+     */
     private void SendUserToFollowsActivity() {
         Intent followActivity = new Intent(MainActivity.this, FollowActivity.class);
         startActivity(followActivity);
     }
 
+    /**
+     * Send the user to find friends activity.
+     */
     private void SendUserToFindFriendsActivity() {
         Intent findFriendsActivity = new Intent(MainActivity.this, FindFriendsActivity.class);
         startActivity(findFriendsActivity);
     }
 
+    /**
+     * Send the user to profile activity.
+     */
     private void SendUserToProfileActivity() {
         Intent profileActivity = new Intent(MainActivity.this, ProfileActivity.class);
         startActivity(profileActivity);
     }
 
+    /**
+     * Send the user to settings activity.
+     */
     private void SendUserToSettingsActivity() {
         Intent settingsActivity = new Intent(MainActivity.this, SettingsActivity.class);
         startActivity(settingsActivity);
     }
 
-    private void SendUserToPostActivity() {
-        Intent postActivity = new Intent(MainActivity.this, PostActivity.class);
+    /**
+     * Send the user to recipe activity.
+     */
+    private void SendUserToRecipeActivity() {
+        Intent postActivity = new Intent(MainActivity.this, RecipeActivity.class);
         startActivity(postActivity);
     }
 
+    /**
+     * Send the user to register activity(and finish this one).
+     */
     private void SendUserToRegisterActivity() {
         Intent registerIntent = new Intent(MainActivity.this, RegisterActivity.class);
         startActivity(registerIntent);
         finish();
     }
 
+    /**
+     * static class for Firebase recycler
+     */
     public static class RecipeViewHolder extends RecyclerView.ViewHolder {
         View view;
 
@@ -376,6 +459,9 @@ public class MainActivity extends AppCompatActivity {
             numOfLikes = view.findViewById(R.id.display_num_likes);
             likesRef = FirebaseDatabase.getInstance().getReference().child("Likes");
             recipeRef = FirebaseDatabase.getInstance().getReference().child("Recipes");
+            /*
+                if user connected, show the like counter, hide otherwise
+             */
             if (FirebaseAuth.getInstance().getCurrentUser() != null)
                 currentUserUid = Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
             else {
@@ -421,6 +507,12 @@ public class MainActivity extends AppCompatActivity {
             Picasso.get().load(recipeimage).placeholder(R.drawable.add_post_high).into(recipeImage);
         }
 
+        /**
+         * change the icon whenever the user likes the post or not, and show the amount of likes
+         * the recipe has.
+         *
+         * @param postKey - uid of the recipe
+         */
         void setLikeButtonStatus(final String postKey) {
             likesRef.addValueEventListener(new ValueEventListener() {
                 @Override

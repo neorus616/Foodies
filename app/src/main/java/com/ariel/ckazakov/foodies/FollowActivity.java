@@ -26,6 +26,9 @@ import java.util.Objects;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
+/**
+ * Activity for displaying all user follow's.
+ */
 public class FollowActivity extends AppCompatActivity {
 
     private RecyclerView myFollowList;
@@ -44,6 +47,9 @@ public class FollowActivity extends AppCompatActivity {
         userRef = FirebaseDatabase.getInstance().getReference().child("Users");
 
         myFollowList = findViewById(R.id.follow_list);
+        /*
+            configurations for the recycle view
+         */
         myFollowList.setHasFixedSize(Boolean.TRUE);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         linearLayoutManager.setReverseLayout(Boolean.TRUE);
@@ -53,7 +59,13 @@ public class FollowActivity extends AppCompatActivity {
         DisplayAllFollows();
     }
 
+    /**
+     * Sorting all follows of current user and displaying them
+     */
     private void DisplayAllFollows() {
+        /*
+            Firebase recycle view configurations for the users
+        */
         FirebaseRecyclerOptions<Follow> options = new FirebaseRecyclerOptions.Builder<Follow>().setQuery(followRef, Follow.class).build();
         FirebaseRecyclerAdapter<Follow, FollowActivity.FollowViewHolder> firebaseRecyclerAdapter = new FirebaseRecyclerAdapter<Follow, FollowActivity.FollowViewHolder>(options) {
             @Override
@@ -70,6 +82,9 @@ public class FollowActivity extends AppCompatActivity {
                             holder.setFullname(userName);
                             holder.setProfileimage(profileImage);
 
+                            /*
+                                if user click on profile image, it redirect him to the user profile page
+                             */
                             holder.itemView.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
@@ -99,6 +114,9 @@ public class FollowActivity extends AppCompatActivity {
         firebaseRecyclerAdapter.startListening();
     }
 
+    /**
+     * static class for Firebase recycler
+     */
     public static class FollowViewHolder extends RecyclerView.ViewHolder {
         View view;
 

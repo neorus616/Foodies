@@ -22,6 +22,9 @@ import com.google.firebase.iid.InstanceIdResult;
 
 import java.util.Objects;
 
+/**
+ * Activity for register.
+ */
 public class RegisterActivity extends AppCompatActivity {
 
     private EditText register_email, register_password, register_confirmPassword;
@@ -54,15 +57,11 @@ public class RegisterActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         FirebaseUser user = firebaseAuth.getCurrentUser();
+        /*
+            If user somehow managed to get here, and he is logged in, send him to main activity
+         */
         if (user != null)
             SendUserToMainActivity();
-    }
-
-    private void SendUserToMainActivity() {
-        Intent mainIntent = new Intent(RegisterActivity.this, MainActivity.class);
-        mainIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(mainIntent);
-        finish();
     }
 
     private void createNewAccount() {
@@ -113,10 +112,23 @@ public class RegisterActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Send the user to profile setup activity(and finish this one).
+     */
     private void SendUserToCreateProfile() {
         Intent profileIntent = new Intent(this, ProfileSetupActivity.class);
         profileIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(profileIntent);
+        finish();
+    }
+
+    /**
+     * Send the user to main activity(and finish this one).
+     */
+    private void SendUserToMainActivity() {
+        Intent mainIntent = new Intent(RegisterActivity.this, MainActivity.class);
+        mainIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(mainIntent);
         finish();
     }
 }

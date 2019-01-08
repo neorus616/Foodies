@@ -31,6 +31,9 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Objects;
 
+/**
+ * Activity for comments section in the recipe
+ */
 public class CommentsActivity extends AppCompatActivity {
 
     private ImageButton postCommentButton;
@@ -50,11 +53,14 @@ public class CommentsActivity extends AppCompatActivity {
         firebaseAuth = FirebaseAuth.getInstance();
         currentUserUID = Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid();
         userRef = FirebaseDatabase.getInstance().getReference().child("Users");
-        postKey = Objects.requireNonNull(getIntent().getExtras().get("postKey")).toString();
+        postKey = Objects.requireNonNull(Objects.requireNonNull(getIntent().getExtras()).get("postKey")).toString();
         recipeRef = FirebaseDatabase.getInstance().getReference().child("Recipes").child(postKey).child("Comments");
 
         commentInput = findViewById(R.id.comment_input);
 
+        /*
+            configurations for the recycle view
+         */
         commentsList = findViewById(R.id.comment_list);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         linearLayoutManager.setReverseLayout(Boolean.TRUE);
@@ -62,6 +68,11 @@ public class CommentsActivity extends AppCompatActivity {
         commentsList.setLayoutManager(linearLayoutManager);
 
         postCommentButton = findViewById(R.id.post_comment_button);
+
+        /*
+            when ever an user click on the comment button, it sends his full name to a validation
+            method.
+         */
         postCommentButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -90,6 +101,10 @@ public class CommentsActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+
+        /*
+            Firebase recycle view configurations for the comments
+         */
         FirebaseRecyclerOptions<Comments> options = new FirebaseRecyclerOptions.Builder<Comments>().setQuery(recipeRef, Comments.class).build();
         FirebaseRecyclerAdapter<Comments, CommentsActivity.CommentsViewHolder> firebaseRecyclerAdapter = new FirebaseRecyclerAdapter<Comments, CommentsActivity.CommentsViewHolder>(options) {
             @Override
@@ -111,6 +126,11 @@ public class CommentsActivity extends AppCompatActivity {
         firebaseRecyclerAdapter.startListening();
     }
 
+    /**
+     * validate that the comments isn't empty, and then saves it to the DB
+     *
+     * @param username - full name of the user
+     */
     private void ValidateComment(String username) {
         if (commentInput.getText().toString().isEmpty())
             Toast.makeText(this, "You can't post empty comment!", Toast.LENGTH_SHORT).show();
@@ -120,6 +140,9 @@ public class CommentsActivity extends AppCompatActivity {
             final String saveCurrentDate = currentDate.format(calendarDate.getTime());
             SimpleDateFormat currentTime = new SimpleDateFormat("HH:mm", Locale.US);
             final String saveCurrentTime = currentTime.format(calendarDate.getTime());
+            /*
+                for saving multiple comments in the same minute from same user
+             */
             SimpleDateFormat currentTimeSec = new SimpleDateFormat("HH:mm:ss", Locale.US);
             final String saveCurrentTimeSec = currentTimeSec.format(calendarDate.getTime());
 
@@ -144,6 +167,9 @@ public class CommentsActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * static class for Firebase recycler
+     */
     public static class CommentsViewHolder extends RecyclerView.ViewHolder {
         View view;
 

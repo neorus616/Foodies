@@ -30,60 +30,75 @@ import java.util.Objects;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
-public class MyPostsActivity extends AppCompatActivity {
+/**
+ * Activity to show all recipes of an user.
+ */
+public class AllRecipesActivity extends AppCompatActivity {
 
     private Toolbar toolbar;
 
-    private RecyclerView myPostList;
+    private RecyclerView recipeList;
 
     private DatabaseReference recipeRef, userRef, likesRef;
     private FirebaseAuth firebaseAuth;
     private String currentUid, userKey;
-    private Query myPostQuery;
+    private Query query;
     private Boolean likeChecker = Boolean.FALSE;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_my_posts);
+        setContentView(R.layout.activity_all_recipes);
 
         firebaseAuth = FirebaseAuth.getInstance();
         recipeRef = FirebaseDatabase.getInstance().getReference().child("Recipes");
         userRef = FirebaseDatabase.getInstance().getReference().child("Users");
         likesRef = FirebaseDatabase.getInstance().getReference().child("Likes");
         currentUid = Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid();
+        /*
+            If user clicked on his posts, or other user posts
+         */
         if (getIntent().getExtras() != null && getIntent().getExtras().get("userKey") != null) {
             userKey = Objects.requireNonNull(getIntent().getExtras().get("userKey")).toString();
-            myPostQuery = recipeRef.orderByChild("uid").startAt(userKey).endAt(userKey + "\uf8ff");
+            query = recipeRef.orderByChild("uid").startAt(userKey).endAt(userKey + "\uf8ff");
         } else
-            myPostQuery = recipeRef.orderByChild("uid").startAt(currentUid).endAt(currentUid + "\uf8ff");
+            query = recipeRef.orderByChild("uid").startAt(currentUid).endAt(currentUid + "\uf8ff");
 
         toolbar = findViewById(R.id.my_posts_bar_layout);
         setSupportActionBar(toolbar);
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(Boolean.TRUE);
         getSupportActionBar().setDisplayShowHomeEnabled(Boolean.TRUE);
         if (userKey == null)
-            getSupportActionBar().setTitle("My Posts");
+            getSupportActionBar().setTitle("My Recipes");
         else
-            getSupportActionBar().setTitle("Posts");
+            getSupportActionBar().setTitle("Recipes");
 
 
-        myPostList = findViewById(R.id.all_my_posts_list);
-        myPostList.setHasFixedSize(Boolean.TRUE);
+        recipeList = findViewById(R.id.all_recipes_list);
+        /*
+            configurations for the recycle view
+         */
+        recipeList.setHasFixedSize(Boolean.TRUE);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         linearLayoutManager.setReverseLayout(Boolean.TRUE);
         linearLayoutManager.setStackFromEnd(Boolean.TRUE);
-        myPostList.setLayoutManager(linearLayoutManager);
+        recipeList.setLayoutManager(linearLayoutManager);
 
-        DisplayMyAllPosts();
+        DisplayAllRecipes();
     }
 
-    private void DisplayMyAllPosts() {
-        FirebaseRecyclerOptions<Recipe> options = new FirebaseRecyclerOptions.Builder<Recipe>().setQuery(myPostQuery, Recipe.class).build();
+    /**
+     * Show all recipes of an user via recycle view.
+     */
+    private void DisplayAllRecipes() {
+        /*
+            Firebase recycle view configurations for the recipes
+         */
+        FirebaseRecyclerOptions<Recipe> options = new FirebaseRecyclerOptions.Builder<Recipe>().setQuery(query, Recipe.class).build();
         FirebaseRecyclerAdapter<Recipe, MyPostsViewHolder> firebaseRecyclerAdapter = new FirebaseRecyclerAdapter<Recipe, MyPostsViewHolder>(options) {
             @Override
-            protected void onBindViewHolder(@NonNull MyPostsActivity.MyPostsViewHolder holder, int position, @NonNull Recipe model) {
+            protected void onBindViewHolder(@NonNull AllRecipesActivity.MyPostsViewHolder holder, int position, @NonNull Recipe model) {
                 final String postKey = getRef(position).getKey();
 
                 holder.setFullname(model.getFullName());
@@ -95,24 +110,34 @@ public class MyPostsActivity extends AppCompatActivity {
 
                 holder.setLikeButtonStatus(postKey);
 
+                /*
+                    if user click on recipe, it redirect him to the recipe page
+                */
                 holder.itemView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        Intent clickPostIntent = new Intent(MyPostsActivity.this, FullRecipeActivity.class);
+                        Intent clickPostIntent = new Intent(AllRecipesActivity.this, FullRecipeActivity.class);
                         clickPostIntent.putExtra("postKey", postKey);
                         startActivity(clickPostIntent);
                     }
                 });
 
+                /*
+                    if user click on comment image, it redirect him to the recipe comments page
+                */
                 holder.commentRecipeButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        Intent commentsIntent = new Intent(MyPostsActivity.this, CommentsActivity.class);
+                        Intent commentsIntent = new Intent(AllRecipesActivity.this, CommentsActivity.class);
                         commentsIntent.putExtra("postKey", postKey);
                         startActivity(commentsIntent);
                     }
                 });
 
+                /*
+                    if user click on like\dislike button, it remove the like if he likes it already,
+                    and add the like otherwise
+                */
                 holder.likeRecipeButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -141,15 +166,18 @@ public class MyPostsActivity extends AppCompatActivity {
 
             @NonNull
             @Override
-            public MyPostsActivity.MyPostsViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            public AllRecipesActivity.MyPostsViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
                 View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.all_recipes_layout, parent, false);
-                return new MyPostsActivity.MyPostsViewHolder(view);
+                return new AllRecipesActivity.MyPostsViewHolder(view);
             }
         };
-        myPostList.setAdapter(firebaseRecyclerAdapter);
+        recipeList.setAdapter(firebaseRecyclerAdapter);
         firebaseRecyclerAdapter.startListening();
     }
 
+    /**
+     * static class for Firebase recycler
+     */
     public static class MyPostsViewHolder extends RecyclerView.ViewHolder {
         View view;
 
@@ -170,6 +198,12 @@ public class MyPostsActivity extends AppCompatActivity {
             currentUserUid = Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
         }
 
+        /**
+         * change the icon whenever the user likes the post or not, and show the amount of likes
+         * the recipe has.
+         *
+         * @param postKey - uid of the recipe
+         */
         public void setLikeButtonStatus(final String postKey) {
             likesRef.addValueEventListener(new ValueEventListener() {
                 @Override

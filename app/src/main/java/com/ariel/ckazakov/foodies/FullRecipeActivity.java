@@ -26,6 +26,9 @@ import com.squareup.picasso.Picasso;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * Activity for displaying the recipe.
+ */
 public class FullRecipeActivity extends AppCompatActivity {
 
     private ImageView fullRecipeImage;
@@ -43,6 +46,9 @@ public class FullRecipeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_full_recipe);
 
+        /*
+            when the user was redirected from another activity, it passed the uid of the recipe
+         */
         postKey = Objects.requireNonNull(Objects.requireNonNull(getIntent().getExtras()).get("postKey")).toString();
         fullrecipedb = FirebaseDatabase.getInstance().getReference().child("Recipes").child(postKey);
         firebaseAuth = FirebaseAuth.getInstance();
@@ -55,11 +61,17 @@ public class FullRecipeActivity extends AppCompatActivity {
         fullRecipeImage = findViewById(R.id.fullRecipeImage);
         fullRecipe = findViewById(R.id.fullRecipe);
         listIngredients = findViewById(R.id.listFullIngredients);
+        /*
+            Set all buttons invisible at first
+         */
         deleteButton = findViewById(R.id.deleteButton);
         deleteButton.setVisibility(View.INVISIBLE);
         editButton = findViewById(R.id.editButton);
         editButton.setVisibility(View.INVISIBLE);
 
+        /*
+            Organize the recipe post.
+         */
         fullrecipedb.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -67,9 +79,12 @@ public class FullRecipeActivity extends AppCompatActivity {
                     recipe = Objects.requireNonNull(dataSnapshot.child("recipe").getValue()).toString();
                     image = Objects.requireNonNull(dataSnapshot.child("recipeimage").getValue()).toString();
                     dbUserUid = Objects.requireNonNull(dataSnapshot.child("uid").getValue()).toString();
-                    GenericTypeIndicator<List<String>> t = new GenericTypeIndicator<List<String>>() {
+                    /*
+                        Using genericType to grab a list of the ingredients.
+                     */
+                    GenericTypeIndicator<List<String>> genericTypeIndicator = new GenericTypeIndicator<List<String>>() {
                     };
-                    listElementsArrayList = dataSnapshot.child("ingredients").getValue(t);
+                    listElementsArrayList = dataSnapshot.child("ingredients").getValue(genericTypeIndicator);
 
                     StringBuilder ingredients = new StringBuilder();
                     if (listElementsArrayList != null) {
@@ -81,6 +96,9 @@ public class FullRecipeActivity extends AppCompatActivity {
                     fullRecipe.setText(recipe);
                     Picasso.get().load(image).into(fullRecipeImage);
 
+                    /*
+                        If the current user is admin, he can edit/delete the recipe.
+                     */
                     adminRef.addValueEventListener(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -96,15 +114,31 @@ public class FullRecipeActivity extends AppCompatActivity {
                         }
                     });
 
+                    /*
+                        If the current user is the one who posted it, he can edit/delete the recipe.
+                     */
                     if (currentUserUid.equals(dbUserUid)) {
                         deleteButton.setVisibility(View.VISIBLE);
                         editButton.setVisibility(View.VISIBLE);
                     }
 
+                    /*
+                        When user click on "Edit" button, it send the 'recipe' to 'EditPost' method.
+                     */
                     editButton.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
                             EditPost(recipe);
+                        }
+                    });
+
+                    /*
+                        When user click on "Edit" button, it send the 'recipe' to 'EditPost' method.
+                    */
+                    deleteButton.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            DeletePost();
                         }
                     });
                 }
@@ -116,14 +150,14 @@ public class FullRecipeActivity extends AppCompatActivity {
             }
         });
 
-        deleteButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                DeletePost();
-            }
-        });
+
     }
 
+    /**
+     * takes the current recipe content, and open a view to the user that allow him to edit it.
+     *
+     * @param recipe - content of the recipe
+     */
     private void EditPost(String recipe) {
         AlertDialog.Builder builder = new AlertDialog.Builder(FullRecipeActivity.this);
         builder.setTitle("Edit Post:");
@@ -132,6 +166,9 @@ public class FullRecipeActivity extends AppCompatActivity {
         newRecipe.setText(recipe);
         builder.setView(newRecipe);
 
+        /*
+            Update button(replace old with new recipe content)
+         */
         builder.setPositiveButton("Update", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -139,6 +176,9 @@ public class FullRecipeActivity extends AppCompatActivity {
                 Toast.makeText(FullRecipeActivity.this, "Recipe Updated!", Toast.LENGTH_SHORT).show();
             }
         });
+        /*
+            Cancel button.
+         */
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -150,12 +190,18 @@ public class FullRecipeActivity extends AppCompatActivity {
         Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawableResource(android.R.color.holo_blue_dark);
     }
 
+    /**
+     * Remove the recipe from DB.
+     */
     private void DeletePost() {
         fullrecipedb.removeValue();
         SendUserToMainActivity();
         Toast.makeText(this, "Post has been deleted", Toast.LENGTH_SHORT).show();
     }
 
+    /**
+     * Send the user to main activity.
+     */
     private void SendUserToMainActivity() {
         Intent mainActivity = new Intent(FullRecipeActivity.this, MainActivity.class);
         startActivity(mainActivity);

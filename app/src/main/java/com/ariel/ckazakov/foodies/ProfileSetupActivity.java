@@ -33,7 +33,9 @@ import java.util.Objects;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
-
+/**
+ * Activity for user to set his profile
+ */
 public class ProfileSetupActivity extends AppCompatActivity {
 
     private EditText firstName, lastName;
@@ -64,6 +66,9 @@ public class ProfileSetupActivity extends AppCompatActivity {
         profileImage = findViewById(R.id.profile_image);
         loadingBar = new ProgressDialog(this);
 
+        /*
+            If user already typed first/last name or uploaded a picture
+         */
         if (getIntent() != null && getIntent().getExtras() != null && getIntent().getExtras().get("updatedProfileImage") != null)
             updatedProfileImage = (Boolean) Objects.requireNonNull(getIntent().getExtras()).get("updatedProfileImage");
         if (getIntent() != null && getIntent().getExtras() != null && getIntent().getExtras().get("firstName") != null)
@@ -78,6 +83,9 @@ public class ProfileSetupActivity extends AppCompatActivity {
             }
         });
 
+        /*
+            Redirect user to his gallery
+         */
         profileImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -88,6 +96,9 @@ public class ProfileSetupActivity extends AppCompatActivity {
             }
         });
 
+        /*
+            If user already uploaded a picture, draws it instead the placeholder
+         */
         profileRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -108,6 +119,9 @@ public class ProfileSetupActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * After user choose a picture, crop it and upload to storage.
+     */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -174,6 +188,9 @@ public class ProfileSetupActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Validate if user typed first, last name and uploaded a picture, if he does, save it to DB.
+     */
     private void saveProfile() {
         String firstname = firstName.getText().toString();
         String lastname = lastName.getText().toString();
@@ -207,6 +224,9 @@ public class ProfileSetupActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Send the user to main activity(and finish this one).
+     */
     private void SendUserToMainActivity() {
         Intent mainIntent = new Intent(ProfileSetupActivity.this, MainActivity.class);
         mainIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);

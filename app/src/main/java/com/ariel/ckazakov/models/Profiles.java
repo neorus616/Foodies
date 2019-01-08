@@ -1,13 +1,26 @@
 package com.ariel.ckazakov.models;
 
+/**
+ * This is a model class for Profile
+ */
 public class Profiles {
     public String profileimage, firstname, lastname;
 
+    /**
+     * default constructor
+     */
     public Profiles() {
     }
 
-    public Profiles(String profileiamge, String firstname, String lastname) {
-        this.profileimage = profileiamge;
+    /**
+     * constructor
+     *
+     * @param profileimage - profile image of the user
+     * @param firstname    - first name of the user
+     * @param lastname     - last name of the user
+     */
+    public Profiles(String profileimage, String firstname, String lastname) {
+        this.profileimage = profileimage;
         this.firstname = firstname;
         this.lastname = lastname;
     }

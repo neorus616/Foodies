@@ -243,7 +243,7 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void SendUserToMyPostsActivity() {
-        Intent myPostsActivity = new Intent(ProfileActivity.this, MyPostsActivity.class);
+        Intent myPostsActivity = new Intent(ProfileActivity.this, AllRecipesActivity.class);
         myPostsActivity.putExtra("userKey", userKey);
         startActivity(myPostsActivity);
     }

@@ -2,16 +2,36 @@ package com.ariel.ckazakov.models;
 
 import java.util.ArrayList;
 
+/**
+ * This is a model class for Recipe
+ */
 public class Recipe {
 
     private String uid, time, date, recipeimage, recipe, fullname, profileimage, title;
     private int counter;
     private ArrayList<String> ingredients;
 
+    /**
+     * default constructor
+     */
     public Recipe() {
 
     }
 
+    /**
+     * constructor
+     *
+     * @param uid          - unique identifier for a recipe
+     * @param time         - time (HH:mm)
+     * @param date         - date (dd-mm-YYYY)
+     * @param recipeimage  - image of the recipe
+     * @param recipe       - content of the recipe
+     * @param fullname     - full name of the publisher
+     * @param profileimage - profile image of the publisher
+     * @param title        - title of the recipe
+     * @param counter      - counter for sorting
+     * @param ingredients  - ingredients of the recipe
+     */
     public Recipe(String uid, String time, String date, String recipeimage, String recipe, String fullname, String profileimage, String title, int counter, ArrayList<String> ingredients) {
         this.uid = uid;
         this.time = time;

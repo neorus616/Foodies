@@ -41,7 +41,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
-public class PostActivity extends AppCompatActivity {
+/**
+ * Activity for post a new recipe.
+ */
+public class RecipeActivity extends AppCompatActivity {
 
     private ImageButton recipeImage;
     private Button button;
@@ -70,13 +73,19 @@ public class PostActivity extends AppCompatActivity {
         listView = findViewById(R.id.ingredient_list);
         addButton = findViewById(R.id.button_ingredient);
         getValue = findViewById(R.id.add_ingredient);
+        /*
+            list the ingredients.
+         */
         listElementsArrayList = new ArrayList<>();
         final ArrayAdapter<String> adapter = new ArrayAdapter<>
-                (PostActivity.this, android.R.layout.simple_list_item_1,
+                (RecipeActivity.this, android.R.layout.simple_list_item_1,
                         listElementsArrayList);
 
         listView.setAdapter(adapter);
 
+        /*
+            when user click on the + button, it add the ingredient to the list, and reset the input line.
+         */
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -87,6 +96,9 @@ public class PostActivity extends AppCompatActivity {
             }
         });
 
+        /*
+            listener that help to scroll inside the list and not on the page itself.
+         */
         listView.setOnTouchListener(new View.OnTouchListener() {
             // Setting on Touch Listener for handling the touch inside ScrollView
             @Override
@@ -98,6 +110,9 @@ public class PostActivity extends AppCompatActivity {
 
         });
 
+        /*
+            when ever user click on ingredient in a list, it remove it.
+         */
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -140,6 +155,9 @@ public class PostActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Check if recipe contain image, recipe content, ingredients and title.
+     */
     private void validateRecipe() {
 
         if (imageUri == null)
@@ -159,6 +177,9 @@ public class PostActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Saves the recipe image to the storage.
+     */
     private void saveRecipePicToDB() {
         Calendar calendarDate = Calendar.getInstance();
         SimpleDateFormat currentDate = new SimpleDateFormat("dd-MMMM-yyyy", Locale.US);
@@ -189,15 +210,18 @@ public class PostActivity extends AppCompatActivity {
                     loadingBar.dismiss();
                     Uri downloadUri = task.getResult();
                     downloadUrl = Objects.requireNonNull(downloadUri).toString();
-                    Toast.makeText(PostActivity.this, "Image uploaded successfully", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(RecipeActivity.this, "Image uploaded successfully", Toast.LENGTH_SHORT).show();
                     SaveRecipeToDB();
                 } else {
-                    Toast.makeText(PostActivity.this, "upload failed: " + Objects.requireNonNull(task.getException()).getMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(RecipeActivity.this, "upload failed: " + Objects.requireNonNull(task.getException()).getMessage(), Toast.LENGTH_SHORT).show();
                 }
             }
         });
     }
 
+    /**
+     * Saves the recipe to the DB.
+     */
     private void SaveRecipeToDB() {
         recipeRef.addValueEventListener(new ValueEventListener() {
             @Override
@@ -235,9 +259,9 @@ public class PostActivity extends AppCompatActivity {
                         public void onComplete(@NonNull Task<Void> task) {
                             if (task.isSuccessful()) {
                                 SendUserToMainActivity();
-                                Toast.makeText(PostActivity.this, "Recipe updated successfully", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(RecipeActivity.this, "Recipe updated successfully", Toast.LENGTH_SHORT).show();
                             } else
-                                Toast.makeText(PostActivity.this, "Error occurred: " + Objects.requireNonNull(task.getException()).getMessage(), Toast.LENGTH_SHORT).show();
+                                Toast.makeText(RecipeActivity.this, "Error occurred: " + Objects.requireNonNull(task.getException()).getMessage(), Toast.LENGTH_SHORT).show();
                             loadingBar.dismiss();
                         }
                     });
@@ -252,6 +276,9 @@ public class PostActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Redirect user to gallery to choose an image for the recipe
+     */
     private void choosePic() {
         Intent picIntent = new Intent();
         picIntent.setAction(Intent.ACTION_GET_CONTENT);
@@ -259,6 +286,9 @@ public class PostActivity extends AppCompatActivity {
         startActivityForResult(picIntent, 1);
     }
 
+    /**
+     * After user pick an image, it set the image instead of the placeholder.
+     */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -271,15 +301,16 @@ public class PostActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-
         if (id == android.R.id.home)
             SendUserToMainActivity();
-
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * Send the user to main activity.
+     */
     private void SendUserToMainActivity() {
-        Intent mainActivity = new Intent(PostActivity.this, MainActivity.class);
+        Intent mainActivity = new Intent(RecipeActivity.this, MainActivity.class);
         startActivity(mainActivity);
     }
 }
